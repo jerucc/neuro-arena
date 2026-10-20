@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Klassisches Snake Spiel</title>
+  <title>Snake Arcade</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -21,13 +21,13 @@
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
 
   <!-- Haupt-Container -->
-  <div class="flex flex-col items-center gap-4 max-w-lg w-full">
+  <div class="flex flex-col items-center gap-4 w-[400px]">
     
     <!-- Scoreboard -->
     <div class="w-full flex justify-between items-center p-4 bg-slate-800/80 rounded-xl border border-slate-700">
       <div>
         <h1 class="text-xl font-bold text-emerald-400">SNAKE GAME</h1>
-        <p class="text-xs text-slate-400">Pfeiltasten oder WASD zum Steuern</p>
+        <p class="text-xs text-slate-400">Pfeile / WASD / Leertaste</p>
       </div>
       <div class="flex gap-6">
         <div class="text-center">
@@ -41,30 +41,30 @@
       </div>
     </div>
 
-    <!-- Spielfeld Canvas -->
-    <div class="relative">
+    <!-- Spielfeld Canvas Area -->
+    <div class="relative w-[400px] h-[400px]">
       <canvas id="gameCanvas" width="400" height="400" class="rounded-xl border border-slate-700"></canvas>
 
       <!-- Start Overlay -->
-      <div id="startOverlay" class="absolute inset-0 bg-slate-950/80 rounded-xl backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-10">
+      <div id="startOverlay" class="absolute inset-0 bg-slate-950/85 rounded-xl backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-20">
         <h2 class="text-3xl font-extrabold text-emerald-400 mb-2">SNAKE</h2>
-        <p class="text-sm text-slate-300 mb-6">Sammle das Futter, fresse nicht deine eigene Schlange!</p>
-        <button id="startBtn" type="button" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105 cursor-pointer">
+        <p class="text-sm text-slate-300 mb-6">Sammle Futter & weiche den Wänden aus!</p>
+        <button id="startBtn" type="button" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all cursor-pointer">
           SPIEL STARTEN
         </button>
       </div>
 
       <!-- Game Over Overlay -->
-      <div id="gameOverOverlay" class="hidden absolute inset-0 bg-slate-950/90 rounded-xl backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-10">
+      <div id="gameOverOverlay" class="hidden absolute inset-0 bg-slate-950/90 rounded-xl backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-20">
         <h2 class="text-3xl font-extrabold text-rose-500 mb-2">GAME OVER</h2>
-        <p class="text-slate-300 mb-4">Deine Erzielten Punkte: <span id="finalScore" class="text-emerald-400 font-bold">0</span></p>
-        <button id="restartBtn" type="button" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+        <p class="text-slate-300 mb-4">Erreichte Punkte: <span id="finalScore" class="text-emerald-400 font-bold">0</span></p>
+        <button id="restartBtn" type="button" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all cursor-pointer">
           NOCHMAL SPIELEN
         </button>
       </div>
     </div>
 
-    <!-- Touch / Mobile-Steuerung -->
+    <!-- Mobile Steuerung -->
     <div class="grid grid-cols-3 gap-2 w-48 md:hidden mt-2">
       <div></div>
       <button id="btnUp" type="button" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">▲</button>
@@ -77,33 +77,165 @@
   </div>
 
   <script>
-    (function() {
-      function initSnakeGame() {
-        const canvas = document.getElementById('gameCanvas');
-        if (!canvas) return;
-        const ctx = canvas.getContext('2d');
+    document.addEventListener('DOMContentLoaded', () => {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
 
-        const scoreDisplay = document.getElementById('score');
-        const highscoreDisplay = document.getElementById('highscore');
-        const finalScoreDisplay = document.getElementById('finalScore');
-        const startOverlay = document.getElementById('startOverlay');
-        const gameOverOverlay = document.getElementById('gameOverOverlay');
-        const startBtn = document.getElementById('startBtn');
-        const restartBtn = document.getElementById('restartBtn');
+      const scoreDisplay = document.getElementById('score');
+      const highscoreDisplay = document.getElementById('highscore');
+      const finalScoreDisplay = document.getElementById('finalScore');
+      const startOverlay = document.getElementById('startOverlay');
+      const gameOverOverlay = document.getElementById('gameOverOverlay');
+      const startBtn = document.getElementById('startBtn');
+      const restartBtn = document.getElementById('restartBtn');
 
-        const gridSize = 20;
-        const tileCount = canvas.width / gridSize;
+      const gridSize = 20;
+      const tileCount = canvas.width / gridSize;
 
-        let snake = [];
-        let food = { x: 0, y: 0 };
-        let dx = gridSize;
-        let dy = 0;
-        let nextDx = gridSize;
-        let nextDy = 0;
-        let score = 0;
-        let highscore = localStorage.getItem('snake_highscore') || 0;
-        let gameInterval = null;
-        let gameSpeed = 100;
-        let isRunning = false;
+      let snake = [];
+      let food = { x: 0, y: 0 };
+      let dx = gridSize;
+      let dy = 0;
+      let nextDx = gridSize;
+      let nextDy = 0;
+      let score = 0;
+      let highscore = localStorage.getItem('snake_hs') || 0;
+      let gameInterval = null;
+      let isRunning = false;
 
-        if (
+      if (highscoreDisplay) highscoreDisplay.textContent = highscore;
+
+      function startNewGame() {
+        snake = [
+          { x: 160, y: 200 },
+          { x: 140, y: 200 },
+          { x: 120, y: 200 }
+        ];
+        score = 0;
+        dx = gridSize;
+        dy = 0;
+        nextDx = gridSize;
+        nextDy = 0;
+
+        if (scoreDisplay) scoreDisplay.textContent = score;
+        if (startOverlay) startOverlay.style.display = 'none';
+        if (gameOverOverlay) gameOverOverlay.classList.add('hidden');
+
+        spawnFood();
+        clearInterval(gameInterval);
+        isRunning = true;
+        gameInterval = setInterval(gameLoop, 100);
+      }
+
+      function spawnFood() {
+        food.x = Math.floor(Math.random() * tileCount) * gridSize;
+        food.y = Math.floor(Math.random() * tileCount) * gridSize;
+
+        for (let part of snake) {
+          if (part.x === food.x && part.y === food.y) {
+            spawnFood();
+            break;
+          }
+        }
+      }
+
+      function gameLoop() {
+        if (!isRunning) return;
+
+        if (checkCollision()) {
+          endGame();
+          return;
+        }
+
+        dx = nextDx;
+        dy = nextDy;
+
+        // Canvas leeren
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Gitter zeichnen
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i < canvas.width; i += gridSize) {
+          ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+        }
+
+        // Futter zeichnen
+        ctx.fillStyle = '#f43f5e';
+        ctx.beginPath();
+        ctx.arc(food.x + gridSize/2, food.y + gridSize/2, gridSize/2 - 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Schlange bewegen
+        const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+        snake.unshift(head);
+
+        if (head.x === food.x && head.y === food.y) {
+          score += 10;
+          if (scoreDisplay) scoreDisplay.textContent = score;
+          if (score > highscore) {
+            highscore = score;
+            if (highscoreDisplay) highscoreDisplay.textContent = highscore;
+            localStorage.setItem('snake_hs', highscore);
+          }
+          spawnFood();
+        } else {
+          snake.pop();
+        }
+
+        // Schlange zeichnen
+        snake.forEach((part, index) => {
+          ctx.fillStyle = index === 0 ? '#10b981' : '#34d399';
+          ctx.fillRect(part.x, part.y, gridSize - 1, gridSize - 1);
+        });
+      }
+
+      function checkCollision() {
+        const head = snake[0];
+        if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+          return true;
+        }
+        for (let i = 1; i < snake.length; i++) {
+          if (snake[i].x === head.x && snake[i].y === head.y) return true;
+        }
+        return false;
+      }
+
+      function endGame() {
+        isRunning = false;
+        clearInterval(gameInterval);
+        if (finalScoreDisplay) finalScoreDisplay.textContent = score;
+        if (gameOverOverlay) gameOverOverlay.classList.remove('hidden');
+      }
+
+      // Tasten-Steuerung
+      window.addEventListener('keydown', (e) => {
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+          e.preventDefault();
+        }
+
+        if (e.key === ' ' && !isRunning) {
+          startNewGame();
+          return;
+        }
+
+        if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && dx === 0) { nextDx = -gridSize; nextDy = 0; }
+        if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && dy === 0) { nextDx = 0; nextDy = -gridSize; }
+        if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && dx === 0) { nextDx = gridSize; nextDy = 0; }
+        if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && dy === 0) { nextDx = 0; nextDy = gridSize; }
+      });
+
+      startBtn.addEventListener('click', startNewGame);
+      restartBtn.addEventListener('click', startNewGame);
+
+      // On-Screen Buttons
+      document.getElementById('btnUp')?.addEventListener('click', () => { if (dy === 0) { nextDx = 0; nextDy = -gridSize; } });
+      document.getElementById('btnDown')?.addEventListener('click', () => { if (dy === 0) { nextDx = 0; nextDy = gridSize; } });
+      document.getElementById('btnLeft')?.addEventListener('click', () => { if (dx === 0) { nextDx = -gridSize; nextDy = 0; } });
+      document.getElementById('btnRight')?.addEventListener('click', () => { if (dx === 0) { nextDx = gridSize; nextDy = 0; } });
+    });
+  </script>
+</body>
+</html>
