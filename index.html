@@ -100,8 +100,11 @@
       let nextDy = 0;
       let score = 0;
       let highscore = localStorage.getItem('snake_hs') || 0;
-      let gameInterval = null;
+      
       let isRunning = false;
+      let lastTime = 0;
+      let dropCounter = 0;
+      const dropInterval = 130; // Millisekunden pro Schritt (Geschwindigkeit)
 
       if (highscoreDisplay) highscoreDisplay.textContent = highscore;
 
@@ -131,8 +134,7 @@
       }
 
       function startNewGame() {
-        // Vorherigen Loop absolut sicher stoppen
-        if (gameInterval) clearInterval(gameInterval);
+        isRunning = false;
 
         snake = [
           { x: 160, y: 160 },
@@ -145,6 +147,7 @@
         dy = 0;
         nextDx = gridSize;
         nextDy = 0;
+        dropCounter = 0;
 
         if (scoreDisplay) scoreDisplay.textContent = score;
         if (startOverlay) startOverlay.style.display = 'none';
@@ -154,7 +157,8 @@
         draw();
 
         isRunning = true;
-        gameInterval = setInterval(gameLoop, 150);
+        lastTime = performance.now();
+        requestAnimationFrame(gameLoop);
       }
 
       function spawnFood() {
@@ -169,9 +173,24 @@
         }
       }
 
-      function gameLoop() {
+      function gameLoop(time = 0) {
         if (!isRunning) return;
 
+        const deltaTime = time - lastTime;
+        lastTime = time;
+        dropCounter += deltaTime;
+
+        if (dropCounter > dropInterval) {
+          dropCounter = 0;
+          updateGame();
+        }
+
+        if (isRunning) {
+          requestAnimationFrame(gameLoop);
+        }
+      }
+
+      function updateGame() {
         dx = nextDx;
         dy = nextDy;
 
@@ -211,7 +230,6 @@
 
       function endGame() {
         isRunning = false;
-        if (gameInterval) clearInterval(gameInterval);
         if (finalScoreDisplay) finalScoreDisplay.textContent = score;
         if (gameOverOverlay) gameOverOverlay.classList.remove('hidden');
       }
@@ -229,7 +247,7 @@
         if ((e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') && dx === 0) { nextDx = -gridSize; nextDy = 0; }
         if ((e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') && dy === 0) { nextDx = 0; nextDy = -gridSize; }
         if ((e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') && dx === 0) { nextDx = gridSize; nextDy = 0; }
-        if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && dy === 0) { nextDx = 0; nextDy = gridSize; }
+        if ((e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') && dx === 0) { nextDx = 0; nextDy = gridSize; }
       });
 
       startBtn.addEventListener('click', startNewGame);
