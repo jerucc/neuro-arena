@@ -77,29 +77,33 @@
   </div>
 
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const canvas = document.getElementById('gameCanvas');
-      const ctx = canvas.getContext('2d');
+    (function() {
+      function initSnakeGame() {
+        const canvas = document.getElementById('gameCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
 
-      const scoreDisplay = document.getElementById('score');
-      const highscoreDisplay = document.getElementById('highscore');
-      const finalScoreDisplay = document.getElementById('finalScore');
-      const startOverlay = document.getElementById('startOverlay');
-      const gameOverOverlay = document.getElementById('gameOverOverlay');
-      const startBtn = document.getElementById('startBtn');
-      const restartBtn = document.getElementById('restartBtn');
+        const scoreDisplay = document.getElementById('score');
+        const highscoreDisplay = document.getElementById('highscore');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const startOverlay = document.getElementById('startOverlay');
+        const gameOverOverlay = document.getElementById('gameOverOverlay');
+        const startBtn = document.getElementById('startBtn');
+        const restartBtn = document.getElementById('restartBtn');
 
-      const gridSize = 20;
-      const tileCount = canvas.width / gridSize;
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
 
-      let snake = [];
-      let food = { x: 0, y: 0 };
-      let dx = gridSize;
-      let dy = 0;
-      let score = 0;
-      let highscore = localStorage.getItem('snake_highscore') || 0;
-      let gameInterval = null;
-      let gameSpeed = 100;
-      let changingDirection = false;
+        let snake = [];
+        let food = { x: 0, y: 0 };
+        let dx = gridSize;
+        let dy = 0;
+        let nextDx = gridSize;
+        let nextDy = 0;
+        let score = 0;
+        let highscore = localStorage.getItem('snake_highscore') || 0;
+        let gameInterval = null;
+        let gameSpeed = 100;
+        let isRunning = false;
 
-      highscoreDisplay.textContent = highscore;
+        if (
