@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NeuroArena: AI Tactical Brawl</title>
+  <title>Jungle Survival: AI Tactical Brawl</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      background-color: #0d1117;
-      color: #c9d1d9;
+      background-color: #061208;
+      color: #d1fae5;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       user-select: none;
     }
     canvas {
-      background: radial-gradient(circle, #161b22 0%, #0d1117 100%);
-      box-shadow: 0 0 20px rgba(0, 255, 204, 0.15);
+      background: radial-gradient(circle, #0f2918 0%, #061208 100%);
+      box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
     }
     .glass-panel {
-      background: rgba(22, 27, 34, 0.85);
+      background: rgba(15, 41, 24, 0.85);
       backdrop-filter: blur(8px);
-      border: 1px solid rgba(48, 54, 61, 0.8);
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
   </style>
 </head>
@@ -31,58 +31,58 @@
     <!-- Header / Scoreboard -->
     <header class="w-full flex justify-between items-center p-4 rounded-xl glass-panel">
       <div>
-        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-500">
-          NEURO-ARENA
+        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-green-300">
+          JUNGLE SURVIVAL
         </h1>
-        <p class="text-xs text-gray-400">Tactical AI Steering & Dynamic Combat</p>
+        <p class="text-xs text-emerald-500/80">Explorer Edition & Wildlife AI Combat</p>
       </div>
 
       <div class="flex gap-6 text-sm">
         <div class="text-center">
-          <span class="block text-gray-400 text-xs">WAVE</span>
-          <span id="waveDisplay" class="font-bold text-teal-400 text-lg">1</span>
+          <span class="block text-emerald-500 text-xs">WAVE</span>
+          <span id="waveDisplay" class="font-bold text-emerald-400 text-lg">1</span>
         </div>
         <div class="text-center">
-          <span class="block text-gray-400 text-xs">SCORE</span>
-          <span id="scoreDisplay" class="font-bold text-cyan-400 text-lg">0</span>
+          <span class="block text-emerald-500 text-xs">SCORE</span>
+          <span id="scoreDisplay" class="font-bold text-green-300 text-lg">0</span>
         </div>
         <div class="text-center">
-          <span class="block text-gray-400 text-xs">AI ENEMIES</span>
-          <span id="enemyCountDisplay" class="font-bold text-rose-400 text-lg">0</span>
+          <span class="block text-emerald-500 text-xs">BEASTS</span>
+          <span id="enemyCountDisplay" class="font-bold text-amber-400 text-lg">0</span>
         </div>
       </div>
     </header>
 
     <!-- Canvas Area with Overlays -->
     <div class="relative w-full flex justify-center">
-      <canvas id="gameCanvas" width="900" height="550" class="rounded-xl border border-gray-800"></canvas>
+      <canvas id="gameCanvas" width="900" height="550" class="rounded-xl border border-emerald-900/50"></canvas>
 
       <!-- Pause / Start Overlay -->
-      <div id="startOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/80 rounded-xl backdrop-blur-sm p-6 text-center">
-        <h2 class="text-3xl font-extrabold text-white mb-2">NEURO-ARENA: AI BRAWL</h2>
-        <p class="text-sm text-gray-300 max-w-md mb-6">
-          Defend yourself against adaptive AI combat drones utilizing flocking behavior, predictive aim, line-of-sight flanking, and tactical retreat states.
+      <div id="startOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/85 rounded-xl backdrop-blur-sm p-6 text-center">
+        <h2 class="text-3xl font-extrabold text-emerald-400 mb-2">JUNGLE SURVIVAL: AI BRAWL</h2>
+        <p class="text-sm text-emerald-200/80 max-w-md mb-6">
+          Explore the deep jungle, survive waves of adaptive wildlife and tribal beasts using ancient stone ruins for cover.
         </p>
-        <div class="text-xs text-teal-300 bg-teal-950/60 p-3 rounded border border-teal-800/50 mb-6 text-left space-y-1">
+        <div class="text-xs text-emerald-300 bg-emerald-950/80 p-3 rounded border border-emerald-800/60 mb-6 text-left space-y-1">
           <p>🎮 <strong>Controls:</strong> WASD / Arrow Keys to move</p>
           <p>🎯 <strong>Aim & Shoot:</strong> Mouse position & Left Click</p>
-          <p>⚡ <strong>Dash Skill:</strong> SPACEBAR</p>
+          <p>⚡ <strong>Jungle Roll (Dash):</strong> SPACEBAR</p>
         </div>
-        <button id="startBtn" class="px-8 py-3 bg-teal-500 hover:bg-teal-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-teal-500/30 transition-all transform hover:scale-105">
-          START BATTLE
+        <button id="startBtn" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all transform hover:scale-105">
+          ENTER JUNGLE
         </button>
       </div>
 
       <!-- Game Over Overlay -->
       <div id="gameOverOverlay" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/90 rounded-xl backdrop-blur-md p-6 text-center">
-        <h2 class="text-4xl font-extrabold text-rose-500 mb-2">SYSTEM FAILURE</h2>
-        <p class="text-gray-400 mb-4">Your combat drone was neutralized.</p>
-        <div class="bg-gray-900/80 p-4 rounded-lg border border-gray-800 mb-6 text-sm">
-          <p class="text-gray-300">Final Score: <span id="finalScore" class="text-teal-400 font-bold">0</span></p>
-          <p class="text-gray-300">Waves Survived: <span id="finalWave" class="text-cyan-400 font-bold">0</span></p>
+        <h2 class="text-4xl font-extrabold text-rose-500 mb-2">OVERWHELMED</h2>
+        <p class="text-emerald-300/80 mb-4">You did not survive the jungle wilds.</p>
+        <div class="bg-emerald-950/80 p-4 rounded-lg border border-emerald-900 mb-6 text-sm">
+          <p class="text-emerald-200">Final Score: <span id="finalScore" class="text-emerald-400 font-bold">0</span></p>
+          <p class="text-emerald-200">Waves Survived: <span id="finalWave" class="text-green-300 font-bold">0</span></p>
         </div>
-        <button id="restartBtn" class="px-8 py-3 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-lg shadow-lg shadow-rose-500/30 transition-all">
-          REBOOT SYSTEM
+        <button id="restartBtn" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all">
+          TRY AGAIN
         </button>
       </div>
     </div>
@@ -92,24 +92,24 @@
       
       <!-- Player Status -->
       <div class="p-4 rounded-xl glass-panel flex flex-col justify-between">
-        <h3 class="text-xs font-bold text-teal-400 uppercase tracking-wider mb-2">Player Systems</h3>
+        <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Explorer Status</h3>
         <div class="space-y-2">
           <div>
             <div class="flex justify-between text-xs mb-1">
-              <span>Hull Integrity</span>
+              <span>Health / Stamina</span>
               <span id="hpText">100/100</span>
             </div>
-            <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
-              <div id="hpBar" class="bg-teal-400 h-full w-full transition-all duration-200"></div>
+            <div class="w-full bg-emerald-950 h-2 rounded-full overflow-hidden border border-emerald-900">
+              <div id="hpBar" class="bg-emerald-400 h-full w-full transition-all duration-200"></div>
             </div>
           </div>
           <div>
             <div class="flex justify-between text-xs mb-1">
-              <span>Dash Thrusters</span>
+              <span>Roll Dash</span>
               <span id="dashText">READY</span>
             </div>
-            <div class="w-full bg-gray-800 h-1.5 rounded-full overflow-hidden">
-              <div id="dashBar" class="bg-cyan-400 h-full w-full transition-all duration-200"></div>
+            <div class="w-full bg-emerald-950 h-1.5 rounded-full overflow-hidden border border-emerald-900">
+              <div id="dashBar" class="bg-green-400 h-full w-full transition-all duration-200"></div>
             </div>
           </div>
         </div>
@@ -117,32 +117,32 @@
 
       <!-- AI Live Telemetry -->
       <div class="p-4 rounded-xl glass-panel flex flex-col justify-between">
-        <h3 class="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2">AI Telemetry & State</h3>
+        <h3 class="text-xs font-bold text-green-300 uppercase tracking-wider mb-2">Beast AI Behavior</h3>
         <div class="space-y-1 text-xs">
           <div class="flex justify-between">
-            <span class="text-gray-400">Current AI State:</span>
-            <span id="aiStateText" class="text-amber-400 font-mono">ENGAGING</span>
+            <span class="text-emerald-400/80">Beast State:</span>
+            <span id="aiStateText" class="text-amber-400 font-mono">HUNTING</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-400">Flanking Vector:</span>
-            <span id="aiFlankText" class="text-cyan-400 font-mono">CALCULATING...</span>
+            <span class="text-emerald-400/80">Flanking Pack:</span>
+            <span id="aiFlankText" class="text-green-300 font-mono">ACTIVE</span>
           </div>
           <div class="flex justify-between">
-            <span class="text-gray-400">Predictive Lead Aim:</span>
-            <span class="text-teal-400 font-mono">ACTIVE (v2.4)</span>
+            <span class="text-emerald-400/80">Predictive Lead:</span>
+            <span class="text-emerald-400 font-mono">ACTIVE</span>
           </div>
         </div>
       </div>
 
       <!-- Realtime Tuning -->
       <div class="p-4 rounded-xl glass-panel flex flex-col justify-between">
-        <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Overclock AI Aggression</h3>
+        <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Wildlife Aggression</h3>
         <div class="space-y-2">
           <div class="flex items-center justify-between gap-2">
-            <label for="aiAggrSlider" class="text-xs text-gray-300">Reaction Speed:</label>
-            <input type="range" id="aiAggrSlider" min="1" max="5" value="3" class="w-24 accent-teal-400">
+            <label for="aiAggrSlider" class="text-xs text-emerald-200">Beast Speed:</label>
+            <input type="range" id="aiAggrSlider" min="1" max="5" value="3" class="w-24 accent-emerald-400">
           </div>
-          <p class="text-[10px] text-gray-400 leading-tight">
+          <p class="text-[10px] text-emerald-400/70 leading-tight">
             Dynamically scales enemy reaction velocity and lead aiming accuracy.
           </p>
         </div>
@@ -180,16 +180,16 @@
     let mouse = { x: canvas.width / 2, y: canvas.height / 2, isDown: false };
     let lastTime = 0;
 
-    // Arena Obstacles
+    // Ancient Ruins / Foliage Obstacles
     const obstacles = [
-      { x: 220, y: 140, w: 90, h: 90 },
-      { x: 590, y: 140, w: 90, h: 90 },
-      { x: 405, y: 320, w: 90, h: 90 },
-      { x: 220, y: 380, w: 90, h: 50 },
-      { x: 590, y: 380, w: 90, h: 50 }
+      { x: 220, y: 140, w: 90, h: 90, type: 'ruin' },
+      { x: 590, y: 140, w: 90, h: 90, type: 'ruin' },
+      { x: 405, y: 320, w: 90, h: 90, type: 'bush' },
+      { x: 220, y: 380, w: 90, h: 50, type: 'ruin' },
+      { x: 590, y: 380, w: 90, h: 50, type: 'bush' }
     ];
 
-    // Player Class
+    // Player Explorer Class
     class Player {
       constructor(x, y) {
         this.x = x;
@@ -205,11 +205,9 @@
         this.fireRate = 140; // ms
         this.dashCooldown = 0;
         this.maxDashCooldown = 2000; // ms
-        this.isDashing = false;
       }
 
       update(dt) {
-        // Keyboard Movement
         let dx = 0;
         let dy = 0;
         if (keys['w'] || keys['W'] || keys['ArrowUp']) dy -= 1;
@@ -217,526 +215,17 @@
         if (keys['a'] || keys['A'] || keys['ArrowLeft']) dx -= 1;
         if (keys['d'] || keys['D'] || keys['ArrowRight']) dx += 1;
 
-        // Normalize
         if (dx !== 0 && dy !== 0) {
           dx *= 0.7071;
           dy *= 0.7071;
         }
 
-        // Dash Ability
+        // Jungle Roll Dash
         if ((keys[' '] || keys['Spacebar']) && this.dashCooldown <= 0 && (dx !== 0 || dy !== 0)) {
           this.vx = dx * 16;
           this.vy = dy * 16;
           this.dashCooldown = this.maxDashCooldown;
-          createParticles(this.x, this.y, '#38bdf8', 12);
+          createParticles(this.x, this.y, '#34d399', 12);
         } else {
           this.vx += (dx * this.speed - this.vx) * 0.2;
-          this.vy += (dy * this.speed - this.vy) * 0.2;
-        }
-
-        // Cool Down Timers
-        if (this.dashCooldown > 0) this.dashCooldown -= dt;
-
-        // Position Updates with Collision
-        moveAndResolveCollisions(this, this.vx, this.vy);
-
-        // Angle facing mouse
-        this.angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
-
-        // Shooting
-        if (mouse.isDown && Date.now() - this.lastShot > this.fireRate) {
-          this.shoot();
-          this.lastShot = Date.now();
-        }
-      }
-
-      shoot() {
-        const bulletSpeed = 9;
-        const bx = this.x + Math.cos(this.angle) * (this.radius + 4);
-        const by = this.y + Math.sin(this.angle) * (this.radius + 4);
-        bullets.push(new Bullet(bx, by, Math.cos(this.angle) * bulletSpeed, Math.sin(this.angle) * bulletSpeed, true));
-      }
-
-      draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-
-        // Drone Body
-        ctx.fillStyle = '#0ea5e9';
-        ctx.beginPath();
-        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        // Gun Barrel
-        ctx.fillStyle = '#f8fafc';
-        ctx.fillRect(4, -3, 16, 6);
-
-        ctx.restore();
-      }
-    }
-
-    // AI Enemy Drone
-    class AIEnemy {
-      constructor(x, y, tier = 'standard') {
-        this.x = x;
-        this.y = y;
-        this.radius = 15;
-        this.tier = tier; // 'standard', 'flanker', 'boss'
-        this.maxHp = tier === 'boss' ? 180 : (tier === 'flanker' ? 45 : 60);
-        this.hp = this.maxHp;
-        this.speed = tier === 'flanker' ? 3.2 : (tier === 'boss' ? 1.8 : 2.4);
-        this.vx = 0;
-        this.vy = 0;
-        this.angle = 0;
-        this.lastShot = 0;
-        this.fireRate = tier === 'boss' ? 250 : 600;
-        this.state = 'ENGAGE'; // ENGAGE, FLANK, RETREAT
-        this.flankAngleOffset = (Math.random() > 0.5 ? 1 : -1) * (Math.PI / 3 + Math.random() * 0.4);
-      }
-
-      update(dt) {
-        const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
-        const aggrMultiplier = parseFloat(aiAggrSlider.value) / 3;
-
-        // Dynamic State Machine Logic
-        if (this.hp < this.maxHp * 0.3 && distToPlayer < 180) {
-          this.state = 'RETREAT';
-        } else if (distToPlayer > 260 || this.tier === 'flanker') {
-          this.state = 'FLANK';
-        } else {
-          this.state = 'ENGAGE';
-        }
-
-        // Steering Vectors
-        let targetX = player.x;
-        let targetY = player.y;
-
-        if (this.state === 'FLANK') {
-          const baseAngle = Math.atan2(this.y - player.y, this.x - player.x);
-          targetX = player.x + Math.cos(baseAngle + this.flankAngleOffset) * 200;
-          targetY = player.y + Math.sin(baseAngle + this.flankAngleOffset) * 200;
-        } else if (this.state === 'RETREAT') {
-          const awayAngle = Math.atan2(this.y - player.y, this.x - player.x);
-          targetX = this.x + Math.cos(awayAngle) * 150;
-          targetY = this.y + Math.sin(awayAngle) * 150;
-        }
-
-        // Vector calculations
-        let desiredVx = (targetX - this.x);
-        let desiredVy = (targetY - this.y);
-        const dist = Math.hypot(desiredVx, desiredVy);
-
-        if (dist > 0) {
-          desiredVx = (desiredVx / dist) * this.speed * aggrMultiplier;
-          desiredVy = (desiredVy / dist) * this.speed * aggrMultiplier;
-        }
-
-        // Flocking Separation
-        let sepX = 0, sepY = 0;
-        enemies.forEach(other => {
-          if (other !== this) {
-            const d = Math.hypot(other.x - this.x, other.y - this.y);
-            if (d < 45 && d > 0) {
-              sepX -= (other.x - this.x) / d * 1.8;
-              sepY -= (other.y - this.y) / d * 1.8;
-            }
-          }
-        });
-
-        // Combine steering
-        desiredVx += sepX;
-        desiredVy += sepY;
-
-        // Obstacle Avoidance Force
-        obstacles.forEach(obs => {
-          const nearestX = Math.max(obs.x, Math.min(this.x, obs.x + obs.w));
-          const nearestY = Math.max(obs.y, Math.min(this.y, obs.y + obs.h));
-          const obsDist = Math.hypot(this.x - nearestX, this.y - nearestY);
-
-          if (obsDist < 35 && obsDist > 0) {
-            desiredVx += (this.x - nearestX) / obsDist * 3.5;
-            desiredVy += (this.y - nearestY) / obsDist * 3.5;
-          }
-        });
-
-        this.vx += (desiredVx - this.vx) * 0.1;
-        this.vy += (desiredVy - this.vy) * 0.1;
-
-        moveAndResolveCollisions(this, this.vx, this.vy);
-
-        // Predictive Lead Aiming Logic
-        const bulletSpeed = 6.5;
-        const timeToTarget = distToPlayer / bulletSpeed;
-        const predictedPlayerX = player.x + player.vx * timeToTarget * 0.6;
-        const predictedPlayerY = player.y + player.vy * timeToTarget * 0.6;
-
-        this.angle = Math.atan2(predictedPlayerY - this.y, predictedPlayerX - this.x);
-
-        // Shooting Trigger with Line of Sight Check
-        if (Date.now() - this.lastShot > (this.fireRate / aggrMultiplier) && distToPlayer < 420) {
-          if (hasLineOfSight(this.x, this.y, player.x, player.y)) {
-            this.shoot();
-            this.lastShot = Date.now();
-          }
-        }
-      }
-
-      shoot() {
-        const bulletSpeed = 6.5;
-        const bx = this.x + Math.cos(this.angle) * (this.radius + 4);
-        const by = this.y + Math.sin(this.angle) * (this.radius + 4);
-        const color = this.tier === 'boss' ? '#f43f5e' : '#fbbf24';
-        bullets.push(new Bullet(bx, by, Math.cos(this.angle) * bulletSpeed, Math.sin(this.angle) * bulletSpeed, false, color));
-      }
-
-      draw() {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-
-        // Enemy Chassis
-        const color = this.tier === 'boss' ? '#e11d48' : (this.tier === 'flanker' ? '#f59e0b' : '#ef4444');
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.strokeStyle = '#f87171';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Barrel
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(3, -2, 14, 4);
-
-        ctx.restore();
-
-        // Health Bar above AI
-        if (this.hp < this.maxHp) {
-          ctx.fillStyle = 'rgba(0,0,0,0.5)';
-          ctx.fillRect(this.x - 15, this.y - 24, 30, 4);
-          ctx.fillStyle = color;
-          ctx.fillRect(this.x - 15, this.y - 24, (this.hp / this.maxHp) * 30, 4);
-        }
-      }
-    }
-
-    // Bullet Class
-    class Bullet {
-      constructor(x, y, vx, vy, isPlayer, color = '#38bdf8') {
-        this.x = x;
-        this.y = y;
-        this.vx = vx;
-        this.vy = vy;
-        this.radius = isPlayer ? 3.5 : 3;
-        this.isPlayer = isPlayer;
-        this.color = color;
-        this.alive = true;
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-
-        // Canvas Boundary Check
-        if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-          this.alive = false;
-        }
-
-        // Obstacle Collision
-        obstacles.forEach(obs => {
-          if (this.x > obs.x && this.x < obs.x + obs.w && this.y > obs.y && this.y < obs.y + obs.h) {
-            this.alive = false;
-            createParticles(this.x, this.y, '#94a3b8', 4);
-          }
-        });
-      }
-
-      draw() {
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
-    // Particle FX
-    class Particle {
-      constructor(x, y, color) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        this.radius = Math.random() * 2.5 + 1;
-        this.vx = (Math.random() - 0.5) * 6;
-        this.vy = (Math.random() - 0.5) * 6;
-        this.alpha = 1;
-        this.decay = Math.random() * 0.04 + 0.02;
-      }
-
-      update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.alpha -= this.decay;
-      }
-
-      draw() {
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, this.alpha);
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-      }
-    }
-
-    // Global Containers
-    let player;
-    let enemies = [];
-    let bullets = [];
-    let particles = [];
-
-    function createParticles(x, y, color, count = 8) {
-      for (let i = 0; i < count; i++) {
-        particles.push(new Particle(x, y, color));
-      }
-    }
-
-    // Raycast Line of Sight helper
-    function hasLineOfSight(x1, y1, x2, y2) {
-      for (let obs of obstacles) {
-        // Line-Box intersection test simplified
-        if (lineIntersectsBox(x1, y1, x2, y2, obs)) return false;
-      }
-      return true;
-    }
-
-    function lineIntersectsBox(x1, y1, x2, y2, box) {
-      const minX = box.x;
-      const maxX = box.x + box.w;
-      const minY = box.y;
-      const maxY = box.y + box.h;
-
-      // Simple ray sampling along distance
-      const steps = 15;
-      for (let i = 0; i <= steps; i++) {
-        const t = i / steps;
-        const px = x1 + (x2 - x1) * t;
-        const py = y1 + (y2 - y1) * t;
-        if (px >= minX && px <= maxX && py >= minY && py <= maxY) return true;
-      }
-      return false;
-    }
-
-    // Collision Resolution Routine
-    function moveAndResolveCollisions(entity, vx, vy) {
-      entity.x += vx;
-      obstacles.forEach(obs => {
-        if (entity.x + entity.radius > obs.x && entity.x - entity.radius < obs.x + obs.w &&
-            entity.y + entity.radius > obs.y && entity.y - entity.radius < obs.y + obs.h) {
-          if (vx > 0) entity.x = obs.x - entity.radius;
-          else if (vx < 0) entity.x = obs.x + obs.w + entity.radius;
-        }
-      });
-
-      entity.y += vy;
-      obstacles.forEach(obs => {
-        if (entity.x + entity.radius > obs.x && entity.x - entity.radius < obs.x + obs.w &&
-            entity.y + entity.radius > obs.y && entity.y - entity.radius < obs.y + obs.h) {
-          if (vy > 0) entity.y = obs.y - entity.radius;
-          else if (vy < 0) entity.y = obs.y + obs.h + entity.radius;
-        }
-      });
-
-      // Canvas Borders
-      entity.x = Math.max(entity.radius, Math.min(canvas.width - entity.radius, entity.x));
-      entity.y = Math.max(entity.radius, Math.min(canvas.height - entity.radius, entity.y));
-    }
-
-    // Wave Spawner
-    function spawnWave() {
-      const count = 2 + wave * 2;
-      for (let i = 0; i < count; i++) {
-        let sx, sy;
-        do {
-          sx = Math.random() * canvas.width;
-          sy = Math.random() * canvas.height;
-        } while (Math.hypot(sx - player.x, sy - player.y) < 220);
-
-        let tier = 'standard';
-        if (i % 3 === 0) tier = 'flanker';
-        if (wave % 3 === 0 && i === 0) tier = 'boss';
-
-        enemies.push(new AIEnemy(sx, sy, tier));
-      }
-    }
-
-    // Game Setup
-    function initGame() {
-      score = 0;
-      wave = 1;
-      player = new Player(canvas.width / 2, canvas.height / 2);
-      enemies = [];
-      bullets = [];
-      particles = [];
-      spawnWave();
-      gameRunning = true;
-      gameOverOverlay.classList.add('hidden');
-      startOverlay.classList.add('hidden');
-    }
-
-    // Game Loop
-    function gameLoop(timestamp) {
-      const dt = timestamp - lastTime || 0;
-      lastTime = timestamp;
-
-      if (gameRunning) {
-        update(dt);
-        draw();
-      }
-
-      requestAnimationFrame(gameLoop);
-    }
-
-    // Updates
-    function update(dt) {
-      player.update(dt);
-
-      // UI Sync
-      hpBar.style.width = `${Math.max(0, (player.hp / player.maxHp) * 100)}%`;
-      hpText.textContent = `${Math.max(0, Math.round(player.hp))}/${player.maxHp}`;
-
-      const dashPercent = Math.max(0, 100 - (player.dashCooldown / player.maxDashCooldown) * 100);
-      dashBar.style.width = `${dashPercent}%`;
-      dashText.textContent = player.dashCooldown <= 0 ? 'READY' : 'RECHARGING';
-
-      scoreDisplay.textContent = score;
-      waveDisplay.textContent = wave;
-      enemyCountDisplay.textContent = enemies.length;
-
-      // Telemetry telemetry updates
-      if (enemies.length > 0) {
-        aiStateText.textContent = enemies[0].state;
-        aiFlankText.textContent = enemies[0].state === 'FLANK' ? 'ACTIVE (ANGLE)' : 'DIRECT LINE';
-      }
-
-      // Update Bullets
-      bullets.forEach(b => b.update());
-      bullets = bullets.filter(b => b.alive);
-
-      // Update Particles
-      particles.forEach(p => p.update());
-      particles = particles.filter(p => p.alpha > 0);
-
-      // Update AI
-      enemies.forEach(e => e.update(dt));
-
-      // Bullet Collisions
-      bullets.forEach(bullet => {
-        if (bullet.isPlayer) {
-          enemies.forEach(enemy => {
-            if (Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y) < enemy.radius + bullet.radius) {
-              enemy.hp -= 20;
-              bullet.alive = false;
-              createParticles(bullet.x, bullet.y, '#f59e0b', 6);
-              if (enemy.hp <= 0) {
-                score += enemy.tier === 'boss' ? 300 : 100;
-              }
-            }
-          });
-        } else {
-          if (Math.hypot(bullet.x - player.x, bullet.y - player.y) < player.radius + bullet.radius) {
-            player.hp -= 12;
-            bullet.alive = false;
-            createParticles(player.x, player.y, '#f43f5e', 8);
-            if (player.hp <= 0) {
-              endGame();
-            }
-          }
-        }
-      });
-
-      // Clear Defeated Enemies
-      enemies = enemies.filter(e => e.hp > 0);
-
-      // Next Wave Trigger
-      if (enemies.length === 0) {
-        wave++;
-        score += 200;
-        spawnWave();
-      }
-    }
-
-    // Render Scene
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Tactical Grid lines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < canvas.width; x += 40) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < canvas.height; y += 40) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-      }
-
-      // Obstacles
-      obstacles.forEach(obs => {
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
-        ctx.strokeStyle = '#334155';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
-      });
-
-      // Entities
-      particles.forEach(p => p.draw());
-      bullets.forEach(b => b.draw());
-      enemies.forEach(e => e.draw());
-      if (player) player.draw();
-    }
-
-    function endGame() {
-      gameRunning = false;
-      document.getElementById('finalScore').textContent = score;
-      document.getElementById('finalWave').textContent = wave;
-      gameOverOverlay.classList.remove('hidden');
-    }
-
-    // Event Listeners
-    window.addEventListener('keydown', e => keys[e.key] = true);
-    window.addEventListener('keyup', e => keys[e.key] = false);
-
-    canvas.addEventListener('mousemove', e => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
-    });
-
-    canvas.addEventListener('mousedown', e => {
-      if (e.button === 0) mouse.isDown = true;
-    });
-
-    window.addEventListener('mouseup', e => {
-      if (e.button === 0) mouse.isDown = false;
-    });
-
-    startBtn.addEventListener('click', initGame);
-    restartBtn.addEventListener('click', initGame);
-
-    // Initial draw call
-    requestAnimationFrame(gameLoop);
-  </script>
-</body>
-</html>
+          this.vy += (dy * this.speed
