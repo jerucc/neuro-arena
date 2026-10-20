@@ -57,8 +57,8 @@
     <div class="relative w-full flex justify-center">
       <canvas id="gameCanvas" width="900" height="550" class="rounded-xl border border-emerald-900/50"></canvas>
 
-      <!-- Pause / Start Overlay -->
-      <div id="startOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/85 rounded-xl backdrop-blur-sm p-6 text-center">
+      <!-- Start Overlay -->
+      <div id="startOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/85 rounded-xl backdrop-blur-sm p-6 text-center z-10">
         <h2 class="text-3xl font-extrabold text-emerald-400 mb-2">JUNGLE SURVIVAL: AI BRAWL</h2>
         <p class="text-sm text-emerald-200/80 max-w-md mb-6">
           Explore the deep jungle, survive waves of adaptive wildlife and tribal beasts using ancient stone ruins for cover.
@@ -68,20 +68,20 @@
           <p>🎯 <strong>Aim & Shoot:</strong> Mouse position & Left Click</p>
           <p>⚡ <strong>Jungle Roll (Dash):</strong> SPACEBAR</p>
         </div>
-        <button id="startBtn" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all transform hover:scale-105">
+        <button id="startBtn" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all transform hover:scale-105 cursor-pointer">
           ENTER JUNGLE
         </button>
       </div>
 
       <!-- Game Over Overlay -->
-      <div id="gameOverOverlay" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/90 rounded-xl backdrop-blur-md p-6 text-center">
+      <div id="gameOverOverlay" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/90 rounded-xl backdrop-blur-md p-6 text-center z-10">
         <h2 class="text-4xl font-extrabold text-rose-500 mb-2">OVERWHELMED</h2>
         <p class="text-emerald-300/80 mb-4">You did not survive the jungle wilds.</p>
         <div class="bg-emerald-950/80 p-4 rounded-lg border border-emerald-900 mb-6 text-sm">
           <p class="text-emerald-200">Final Score: <span id="finalScore" class="text-emerald-400 font-bold">0</span></p>
           <p class="text-emerald-200">Waves Survived: <span id="finalWave" class="text-green-300 font-bold">0</span></p>
         </div>
-        <button id="restartBtn" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all">
+        <button id="restartBtn" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all cursor-pointer">
           TRY AGAIN
         </button>
       </div>
@@ -153,79 +153,543 @@
 
   <!-- Game Logic -->
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    window.addEventListener('DOMContentLoaded', () => {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
 
-    // UI Elements
-    const startOverlay = document.getElementById('startOverlay');
-    const gameOverOverlay = document.getElementById('gameOverOverlay');
-    const startBtn = document.getElementById('startBtn');
-    const restartBtn = document.getElementById('restartBtn');
-    const waveDisplay = document.getElementById('waveDisplay');
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const enemyCountDisplay = document.getElementById('enemyCountDisplay');
-    const hpBar = document.getElementById('hpBar');
-    const hpText = document.getElementById('hpText');
-    const dashBar = document.getElementById('dashBar');
-    const dashText = document.getElementById('dashText');
-    const aiStateText = document.getElementById('aiStateText');
-    const aiFlankText = document.getElementById('aiFlankText');
-    const aiAggrSlider = document.getElementById('aiAggrSlider');
+      const startOverlay = document.getElementById('startOverlay');
+      const gameOverOverlay = document.getElementById('gameOverOverlay');
+      const startBtn = document.getElementById('startBtn');
+      const restartBtn = document.getElementById('restartBtn');
+      const waveDisplay = document.getElementById('waveDisplay');
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const enemyCountDisplay = document.getElementById('enemyCountDisplay');
+      const hpBar = document.getElementById('hpBar');
+      const hpText = document.getElementById('hpText');
+      const dashBar = document.getElementById('dashBar');
+      const dashText = document.getElementById('dashText');
+      const aiStateText = document.getElementById('aiStateText');
+      const aiFlankText = document.getElementById('aiFlankText');
+      const aiAggrSlider = document.getElementById('aiAggrSlider');
 
-    // Game Variables
-    let gameRunning = false;
-    let score = 0;
-    let wave = 1;
-    let keys = {};
-    let mouse = { x: canvas.width / 2, y: canvas.height / 2, isDown: false };
-    let lastTime = 0;
+      let gameRunning = false;
+      let score = 0;
+      let wave = 1;
+      let keys = {};
+      let mouse = { x: canvas.width / 2, y: canvas.height / 2, isDown: false };
+      let lastTime = 0;
 
-    // Ancient Ruins / Foliage Obstacles
-    const obstacles = [
-      { x: 220, y: 140, w: 90, h: 90, type: 'ruin' },
-      { x: 590, y: 140, w: 90, h: 90, type: 'ruin' },
-      { x: 405, y: 320, w: 90, h: 90, type: 'bush' },
-      { x: 220, y: 380, w: 90, h: 50, type: 'ruin' },
-      { x: 590, y: 380, w: 90, h: 50, type: 'bush' }
-    ];
+      const obstacles = [
+        { x: 220, y: 140, w: 90, h: 90, type: 'ruin' },
+        { x: 590, y: 140, w: 90, h: 90, type: 'ruin' },
+        { x: 405, y: 320, w: 90, h: 90, type: 'bush' },
+        { x: 220, y: 380, w: 90, h: 50, type: 'ruin' },
+        { x: 590, y: 380, w: 90, h: 50, type: 'bush' }
+      ];
 
-    // Player Explorer Class
-    class Player {
-      constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.radius = 16;
-        this.maxHp = 100;
-        this.hp = 100;
-        this.speed = 3.8;
-        this.vx = 0;
-        this.vy = 0;
-        this.angle = 0;
-        this.lastShot = 0;
-        this.fireRate = 140; // ms
-        this.dashCooldown = 0;
-        this.maxDashCooldown = 2000; // ms
-      }
-
-      update(dt) {
-        let dx = 0;
-        let dy = 0;
-        if (keys['w'] || keys['W'] || keys['ArrowUp']) dy -= 1;
-        if (keys['s'] || keys['S'] || keys['ArrowDown']) dy += 1;
-        if (keys['a'] || keys['A'] || keys['ArrowLeft']) dx -= 1;
-        if (keys['d'] || keys['D'] || keys['ArrowRight']) dx += 1;
-
-        if (dx !== 0 && dy !== 0) {
-          dx *= 0.7071;
-          dy *= 0.7071;
+      class Player {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.radius = 16;
+          this.maxHp = 100;
+          this.hp = 100;
+          this.speed = 3.8;
+          this.vx = 0;
+          this.vy = 0;
+          this.angle = 0;
+          this.lastShot = 0;
+          this.fireRate = 140;
+          this.dashCooldown = 0;
+          this.maxDashCooldown = 2000;
         }
 
-        // Jungle Roll Dash
-        if ((keys[' '] || keys['Spacebar']) && this.dashCooldown <= 0 && (dx !== 0 || dy !== 0)) {
-          this.vx = dx * 16;
-          this.vy = dy * 16;
-          this.dashCooldown = this.maxDashCooldown;
-          createParticles(this.x, this.y, '#34d399', 12);
-        } else {
-          this.vx += (dx * this.speed - this.vx) * 0.2;
-          this.vy += (dy * this.speed
+        update(dt) {
+          let dx = 0;
+          let dy = 0;
+          if (keys['w'] || keys['W'] || keys['ArrowUp']) dy -= 1;
+          if (keys['s'] || keys['S'] || keys['ArrowDown']) dy += 1;
+          if (keys['a'] || keys['A'] || keys['ArrowLeft']) dx -= 1;
+          if (keys['d'] || keys['D'] || keys['ArrowRight']) dx += 1;
+
+          if (dx !== 0 && dy !== 0) {
+            dx *= 0.7071;
+            dy *= 0.7071;
+          }
+
+          if ((keys[' '] || keys['Spacebar']) && this.dashCooldown <= 0 && (dx !== 0 || dy !== 0)) {
+            this.vx = dx * 16;
+            this.vy = dy * 16;
+            this.dashCooldown = this.maxDashCooldown;
+            createParticles(this.x, this.y, '#34d399', 12);
+          } else {
+            this.vx += (dx * this.speed - this.vx) * 0.2;
+            this.vy += (dy * this.speed - this.vy) * 0.2;
+          }
+
+          if (this.dashCooldown > 0) this.dashCooldown -= dt;
+
+          moveAndResolveCollisions(this, this.vx, this.vy);
+
+          this.angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
+
+          if (mouse.isDown && Date.now() - this.lastShot > this.fireRate) {
+            this.shoot();
+            this.lastShot = Date.now();
+          }
+        }
+
+        shoot() {
+          const bulletSpeed = 9;
+          const bx = this.x + Math.cos(this.angle) * (this.radius + 6);
+          const by = this.y + Math.sin(this.angle) * (this.radius + 6);
+          bullets.push(new Bullet(bx, by, Math.cos(this.angle) * bulletSpeed, Math.sin(this.angle) * bulletSpeed, true));
+        }
+
+        draw() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+
+          ctx.fillStyle = '#065f46';
+          ctx.beginPath();
+          ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.strokeStyle = '#34d399';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+
+          ctx.fillStyle = '#d97706';
+          ctx.beginPath();
+          ctx.arc(2, 0, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(6, -2.5, 16, 5);
+
+          ctx.restore();
+        }
+      }
+
+      class AIEnemy {
+        constructor(x, y, tier = 'standard') {
+          this.x = x;
+          this.y = y;
+          this.radius = tier === 'boss' ? 24 : 15;
+          this.tier = tier;
+          this.maxHp = tier === 'boss' ? 220 : (tier === 'flanker' ? 45 : 70);
+          this.hp = this.maxHp;
+          this.speed = tier === 'flanker' ? 3.4 : (tier === 'boss' ? 1.6 : 2.5);
+          this.vx = 0;
+          this.vy = 0;
+          this.angle = 0;
+          this.lastShot = 0;
+          this.fireRate = tier === 'boss' ? 250 : 600;
+          this.state = 'HUNT';
+          this.flankAngleOffset = (Math.random() > 0.5 ? 1 : -1) * (Math.PI / 3 + Math.random() * 0.4);
+        }
+
+        update(dt) {
+          const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
+          const aggrMultiplier = parseFloat(aiAggrSlider.value) / 3;
+
+          if (this.hp < this.maxHp * 0.3 && distToPlayer < 180) {
+            this.state = 'RETREAT';
+          } else if (distToPlayer > 260 || this.tier === 'flanker') {
+            this.state = 'FLANK';
+          } else {
+            this.state = 'HUNT';
+          }
+
+          let targetX = player.x;
+          let targetY = player.y;
+
+          if (this.state === 'FLANK') {
+            const baseAngle = Math.atan2(this.y - player.y, this.x - player.x);
+            targetX = player.x + Math.cos(baseAngle + this.flankAngleOffset) * 200;
+            targetY = player.y + Math.sin(baseAngle + this.flankAngleOffset) * 200;
+          } else if (this.state === 'RETREAT') {
+            const awayAngle = Math.atan2(this.y - player.y, this.x - player.x);
+            targetX = this.x + Math.cos(awayAngle) * 150;
+            targetY = this.y + Math.sin(awayAngle) * 150;
+          }
+
+          let desiredVx = (targetX - this.x);
+          let desiredVy = (targetY - this.y);
+          const dist = Math.hypot(desiredVx, desiredVy);
+
+          if (dist > 0) {
+            desiredVx = (desiredVx / dist) * this.speed * aggrMultiplier;
+            desiredVy = (desiredVy / dist) * this.speed * aggrMultiplier;
+          }
+
+          let sepX = 0, sepY = 0;
+          enemies.forEach(other => {
+            if (other !== this) {
+              const d = Math.hypot(other.x - this.x, other.y - this.y);
+              if (d < 45 && d > 0) {
+                sepX -= (other.x - this.x) / d * 1.8;
+                sepY -= (other.y - this.y) / d * 1.8;
+              }
+            }
+          });
+
+          desiredVx += sepX;
+          desiredVy += sepY;
+
+          obstacles.forEach(obs => {
+            const nearestX = Math.max(obs.x, Math.min(this.x, obs.x + obs.w));
+            const nearestY = Math.max(obs.y, Math.min(this.y, obs.y + obs.h));
+            const obsDist = Math.hypot(this.x - nearestX, this.y - nearestY);
+
+            if (obsDist < 35 && obsDist > 0) {
+              desiredVx += (this.x - nearestX) / obsDist * 3.5;
+              desiredVy += (this.y - nearestY) / obsDist * 3.5;
+            }
+          });
+
+          this.vx += (desiredVx - this.vx) * 0.1;
+          this.vy += (desiredVy - this.vy) * 0.1;
+
+          moveAndResolveCollisions(this, this.vx, this.vy);
+
+          const bulletSpeed = 6.5;
+          const timeToTarget = distToPlayer / bulletSpeed;
+          const predictedPlayerX = player.x + player.vx * timeToTarget * 0.6;
+          const predictedPlayerY = player.y + player.vy * timeToTarget * 0.6;
+
+          this.angle = Math.atan2(predictedPlayerY - this.y, predictedPlayerX - this.x);
+
+          if (Date.now() - this.lastShot > (this.fireRate / aggrMultiplier) && distToPlayer < 420) {
+            if (hasLineOfSight(this.x, this.y, player.x, player.y)) {
+              this.shoot();
+              this.lastShot = Date.now();
+            }
+          }
+        }
+
+        shoot() {
+          const bulletSpeed = 6.5;
+          const bx = this.x + Math.cos(this.angle) * (this.radius + 4);
+          const by = this.y + Math.sin(this.angle) * (this.radius + 4);
+          const color = this.tier === 'boss' ? '#f59e0b' : '#10b981';
+          bullets.push(new Bullet(bx, by, Math.cos(this.angle) * bulletSpeed, Math.sin(this.angle) * bulletSpeed, false, color));
+        }
+
+        draw() {
+          ctx.save();
+          ctx.translate(this.x, this.y);
+          ctx.rotate(this.angle);
+
+          const color = this.tier === 'boss' ? '#b45309' : (this.tier === 'flanker' ? '#047857' : '#4b5563');
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = this.tier === 'boss' ? '#fbbf24' : '#34d399';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          ctx.fillStyle = '#111827';
+          ctx.fillRect(3, -2, 12, 4);
+
+          ctx.restore();
+
+          if (this.hp < this.maxHp) {
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(this.x - 15, this.y - 28, 30, 4);
+            ctx.fillStyle = '#34d399';
+            ctx.fillRect(this.x - 15, this.y - 28, (this.hp / this.maxHp) * 30, 4);
+          }
+        }
+      }
+
+      class Bullet {
+        constructor(x, y, vx, vy, isPlayer, color = '#34d399') {
+          this.x = x;
+          this.y = y;
+          this.vx = vx;
+          this.vy = vy;
+          this.radius = isPlayer ? 3.5 : 3;
+          this.isPlayer = isPlayer;
+          this.color = color;
+          this.alive = true;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+
+          if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+            this.alive = false;
+          }
+
+          obstacles.forEach(obs => {
+            if (this.x > obs.x && this.x < obs.x + obs.w && this.y > obs.y && this.y < obs.y + obs.h) {
+              this.alive = false;
+              createParticles(this.x, this.y, '#065f46', 4);
+            }
+          });
+        }
+
+        draw() {
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      class Particle {
+        constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          this.color = color;
+          this.radius = Math.random() * 2.5 + 1;
+          this.vx = (Math.random() - 0.5) * 6;
+          this.vy = (Math.random() - 0.5) * 6;
+          this.alpha = 1;
+          this.decay = Math.random() * 0.04 + 0.02;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.alpha -= this.decay;
+        }
+
+        draw() {
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, this.alpha);
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
+
+      let player;
+      let enemies = [];
+      let bullets = [];
+      let particles = [];
+
+      function createParticles(x, y, color, count = 8) {
+        for (let i = 0; i < count; i++) {
+          particles.push(new Particle(x, y, color));
+        }
+      }
+
+      function hasLineOfSight(x1, y1, x2, y2) {
+        for (let obs of obstacles) {
+          if (lineIntersectsBox(x1, y1, x2, y2, obs)) return false;
+        }
+        return true;
+      }
+
+      function lineIntersectsBox(x1, y1, x2, y2, box) {
+        const minX = box.x;
+        const maxX = box.x + box.w;
+        const minY = box.y;
+        const maxY = box.y + box.h;
+
+        const steps = 15;
+        for (let i = 0; i <= steps; i++) {
+          const t = i / steps;
+          const px = x1 + (x2 - x1) * t;
+          const py = y1 + (y2 - y1) * t;
+          if (px >= minX && px <= maxX && py >= minY && py <= maxY) return true;
+        }
+        return false;
+      }
+
+      function moveAndResolveCollisions(entity, vx, vy) {
+        entity.x += vx;
+        obstacles.forEach(obs => {
+          if (entity.x + entity.radius > obs.x && entity.x - entity.radius < obs.x + obs.w &&
+              entity.y + entity.radius > obs.y && entity.y - entity.radius < obs.y + obs.h) {
+            if (vx > 0) entity.x = obs.x - entity.radius;
+            else if (vx < 0) entity.x = obs.x + obs.w + entity.radius;
+          }
+        });
+
+        entity.y += vy;
+        obstacles.forEach(obs => {
+          if (entity.x + entity.radius > obs.x && entity.x - entity.radius < obs.x + obs.w &&
+              entity.y + entity.radius > obs.y && entity.y - entity.radius < obs.y + obs.h) {
+            if (vy > 0) entity.y = obs.y - entity.radius;
+            else if (vy < 0) entity.y = obs.y + obs.h + entity.radius;
+          }
+        });
+
+        entity.x = Math.max(entity.radius, Math.min(canvas.width - entity.radius, entity.x));
+        entity.y = Math.max(entity.radius, Math.min(canvas.height - entity.radius, entity.y));
+      }
+
+      function spawnWave() {
+        const count = 2 + wave * 2;
+        for (let i = 0; i < count; i++) {
+          let sx, sy;
+          do {
+            sx = Math.random() * canvas.width;
+            sy = Math.random() * canvas.height;
+          } while (Math.hypot(sx - player.x, sy - player.y) < 220);
+
+          let tier = 'standard';
+          if (i % 3 === 0) tier = 'flanker';
+          if (wave % 3 === 0 && i === 0) tier = 'boss';
+
+          enemies.push(new AIEnemy(sx, sy, tier));
+        }
+      }
+
+      function initGame() {
+        score = 0;
+        wave = 1;
+        player = new Player(canvas.width / 2, canvas.height / 2);
+        enemies = [];
+        bullets = [];
+        particles = [];
+        spawnWave();
+        gameRunning = true;
+        gameOverOverlay.classList.add('hidden');
+        startOverlay.classList.add('hidden');
+      }
+
+      function gameLoop(timestamp) {
+        const dt = timestamp - lastTime || 0;
+        lastTime = timestamp;
+
+        if (gameRunning) {
+          update(dt);
+          draw();
+        }
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      function update(dt) {
+        player.update(dt);
+
+        hpBar.style.width = `${Math.max(0, (player.hp / player.maxHp) * 100)}%`;
+        hpText.textContent = `${Math.max(0, Math.round(player.hp))}/${player.maxHp}`;
+
+        const dashPercent = Math.max(0, 100 - (player.dashCooldown / player.maxDashCooldown) * 100);
+        dashBar.style.width = `${dashPercent}%`;
+        dashText.textContent = player.dashCooldown <= 0 ? 'READY' : 'RECHARGING';
+
+        scoreDisplay.textContent = score;
+        waveDisplay.textContent = wave;
+        enemyCountDisplay.textContent = enemies.length;
+
+        if (enemies.length > 0) {
+          aiStateText.textContent = enemies[0].state;
+          aiFlankText.textContent = enemies[0].state === 'FLANK' ? 'PACK ACTIVE' : 'DIRECT';
+        }
+
+        bullets.forEach(b => b.update());
+        bullets = bullets.filter(b => b.alive);
+
+        particles.forEach(p => p.update());
+        particles = particles.filter(p => p.alpha > 0);
+
+        enemies.forEach(e => e.update(dt));
+
+        bullets.forEach(bullet => {
+          if (bullet.isPlayer) {
+            enemies.forEach(enemy => {
+              if (Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y) < enemy.radius + bullet.radius) {
+                enemy.hp -= 20;
+                bullet.alive = false;
+                createParticles(bullet.x, bullet.y, '#34d399', 6);
+                if (enemy.hp <= 0) {
+                  score += enemy.tier === 'boss' ? 300 : 100;
+                }
+              }
+            });
+          } else {
+            if (Math.hypot(bullet.x - player.x, bullet.y - player.y) < player.radius + bullet.radius) {
+              player.hp -= 12;
+              bullet.alive = false;
+              createParticles(player.x, player.y, '#f43f5e', 8);
+              if (player.hp <= 0) {
+                endGame();
+              }
+            }
+          }
+        });
+
+        enemies = enemies.filter(e => e.hp > 0);
+
+        if (enemies.length === 0) {
+          wave++;
+          score += 200;
+          spawnWave();
+        }
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.04)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x < canvas.width; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, canvas.height);
+          ctx.stroke();
+        }
+        for (let y = 0; y < canvas.height; y += 40) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(canvas.width, y);
+          ctx.stroke();
+        }
+
+        obstacles.forEach(obs => {
+          ctx.fillStyle = obs.type === 'ruin' ? '#064e3b' : '#022c22';
+          ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+          ctx.strokeStyle = '#059669';
+          ctx.lineWidth = 2;
+          ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
+        });
+
+        particles.forEach(p => p.draw());
+        bullets.forEach(b => b.draw());
+        enemies.forEach(e => e.draw());
+        if (player) player.draw();
+      }
+
+      function endGame() {
+        gameRunning = false;
+        document.getElementById('finalScore').textContent = score;
+        document.getElementById('finalWave').textContent = wave;
+        gameOverOverlay.classList.remove('hidden');
+      }
+
+      window.addEventListener('keydown', e => keys[e.key] = true);
+      window.addEventListener('keyup', e => keys[e.key] = false);
+
+      canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = e.clientX - rect.left;
+        mouse.y = e.clientY - rect.top;
+      });
+
+      canvas.addEventListener('mousedown', e => {
+        if (e.button === 0) mouse.isDown = true;
+      });
+
+      window.addEventListener('mouseup', e => {
+        if (e.button === 0) mouse.isDown = false;
+      });
+
+      startBtn.addEventListener('click', initGame);
+      restartBtn.addEventListener('click', initGame);
+
+      requestAnimationFrame(gameLoop);
+    });
+  </script>
+</body>
+</html>
