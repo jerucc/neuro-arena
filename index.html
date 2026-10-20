@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jungle Survival: AI Tactical Brawl</title>
+  <title>Jungle Survival: Tactical RPG Edition</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
@@ -21,6 +21,15 @@
       backdrop-filter: blur(8px);
       border: 1px solid rgba(34, 197, 94, 0.3);
     }
+    .class-card {
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+    }
+    .class-card:hover, .class-card.selected {
+      border-color: #34d399;
+      background: rgba(6, 95, 70, 0.5);
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
@@ -32,9 +41,9 @@
     <header class="w-full flex justify-between items-center p-4 rounded-xl glass-panel">
       <div>
         <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-green-300">
-          JUNGLE SURVIVAL
+          JUNGLE SURVIVAL: RPG
         </h1>
-        <p class="text-xs text-emerald-500/80">Explorer Edition & Wildlife AI Combat</p>
+        <p class="text-xs text-emerald-500/80">Human Characters & Wildlife AI Combat</p>
       </div>
 
       <div class="flex gap-6 text-sm">
@@ -57,17 +66,52 @@
     <div class="relative w-full flex justify-center">
       <canvas id="gameCanvas" width="900" height="550" class="rounded-xl border border-emerald-900/50"></canvas>
 
-      <!-- Start Overlay -->
-      <div id="startOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/85 rounded-xl backdrop-blur-sm p-6 text-center z-10">
-        <h2 class="text-3xl font-extrabold text-emerald-400 mb-2">JUNGLE SURVIVAL: AI BRAWL</h2>
-        <p class="text-sm text-emerald-200/80 max-w-md mb-6">
-          Explore the deep jungle, survive waves of adaptive wildlife and tribal beasts using ancient stone ruins for cover.
+      <!-- Start & Class Selection Overlay -->
+      <div id="startOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/90 rounded-xl backdrop-blur-sm p-6 text-center z-10">
+        <h2 class="text-3xl font-extrabold text-emerald-400 mb-1">CHOOSE YOUR SURVIVOR</h2>
+        <p class="text-xs text-emerald-200/80 max-w-md mb-4">
+          Select a character class with unique stats and tactical abilities to enter the jungle.
         </p>
-        <div class="text-xs text-emerald-300 bg-emerald-950/80 p-3 rounded border border-emerald-800/60 mb-6 text-left space-y-1">
-          <p>🎮 <strong>Controls:</strong> WASD / Arrow Keys to move</p>
-          <p>🎯 <strong>Aim & Shoot:</strong> Mouse position & Left Click</p>
-          <p>⚡ <strong>Jungle Roll (Dash):</strong> SPACEBAR</p>
+
+        <!-- Class Selection Cards -->
+        <div class="grid grid-cols-3 gap-3 w-full max-w-2xl mb-5">
+          <div id="cardRanger" class="class-card selected p-3 rounded-lg border border-emerald-800/80 bg-emerald-950/40 text-left" onclick="selectClass('ranger')">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-emerald-300 text-sm">🤠 RANGER</span>
+              <span class="text-[10px] text-emerald-400 bg-emerald-900/60 px-1.5 py-0.5 rounded">BALANCED</span>
+            </div>
+            <p class="text-[11px] text-gray-300 mb-2">Assault Rifle & Tactical Dodge Roll.</p>
+            <div class="text-[10px] text-emerald-400/80 space-y-0.5">
+              <p>• HP: 100 | Speed: Normal</p>
+              <p>• Ability: Tactical Roll (SPACE)</p>
+            </div>
+          </div>
+
+          <div id="cardScout" class="class-card p-3 rounded-lg border border-emerald-800/80 bg-emerald-950/40 text-left" onclick="selectClass('scout')">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-cyan-300 text-sm">⚡ SCOUT</span>
+              <span class="text-[10px] text-cyan-400 bg-cyan-900/60 px-1.5 py-0.5 rounded">FAST</span>
+            </div>
+            <p class="text-[11px] text-gray-300 mb-2">Dual SMG Rapid Fire & Speed Boost.</p>
+            <div class="text-[10px] text-cyan-400/80 space-y-0.5">
+              <p>• HP: 75 | Speed: Very Fast</p>
+              <p>• Ability: Adrenaline Rush (SPACE)</p>
+            </div>
+          </div>
+
+          <div id="cardHeavy" class="class-card p-3 rounded-lg border border-emerald-800/80 bg-emerald-950/40 text-left" onclick="selectClass('heavy')">
+            <div class="flex items-center justify-between mb-1">
+              <span class="font-bold text-amber-300 text-sm">🛡️ HEAVY</span>
+              <span class="text-[10px] text-amber-400 bg-amber-900/60 px-1.5 py-0.5 rounded">TANK</span>
+            </div>
+            <p class="text-[11px] text-gray-300 mb-2">Shotgun Spread & Explosive Grenades.</p>
+            <div class="text-[10px] text-amber-400/80 space-y-0.5">
+              <p>• HP: 150 | Speed: Slow</p>
+              <p>• Ability: Frag Grenade (SPACE)</p>
+            </div>
+          </div>
         </div>
+
         <button id="startBtn" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all transform hover:scale-105 cursor-pointer">
           ENTER JUNGLE
         </button>
@@ -92,7 +136,7 @@
       
       <!-- Player Status -->
       <div class="p-4 rounded-xl glass-panel flex flex-col justify-between">
-        <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Explorer Status</h3>
+        <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Survivor Status</h3>
         <div class="space-y-2">
           <div>
             <div class="flex justify-between text-xs mb-1">
@@ -105,7 +149,7 @@
           </div>
           <div>
             <div class="flex justify-between text-xs mb-1">
-              <span>Roll Dash</span>
+              <span>Class Ability (SPACE)</span>
               <span id="dashText">READY</span>
             </div>
             <div class="w-full bg-emerald-950 h-1.5 rounded-full overflow-hidden border border-emerald-900">
@@ -153,6 +197,16 @@
 
   <!-- Game Logic -->
   <script>
+    let selectedClass = 'ranger';
+
+    function selectClass(className) {
+      selectedClass = className;
+      document.querySelectorAll('.class-card').forEach(card => card.classList.remove('selected'));
+      if (className === 'ranger') document.getElementById('cardRanger').classList.add('selected');
+      if (className === 'scout') document.getElementById('cardScout').classList.add('selected');
+      if (className === 'heavy') document.getElementById('cardHeavy').classList.add('selected');
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       const canvas = document.getElementById('gameCanvas');
       const ctx = canvas.getContext('2d');
@@ -178,6 +232,7 @@
       let keys = {};
       let mouse = { x: canvas.width / 2, y: canvas.height / 2, isDown: false };
       let lastTime = 0;
+      let animTime = 0;
 
       const obstacles = [
         { x: 220, y: 140, w: 90, h: 90, type: 'ruin' },
@@ -188,20 +243,34 @@
       ];
 
       class Player {
-        constructor(x, y) {
+        constructor(x, y, charClass) {
           this.x = x;
           this.y = y;
           this.radius = 16;
-          this.maxHp = 100;
-          this.hp = 100;
-          this.speed = 3.8;
+          this.charClass = charClass;
+
+          if (charClass === 'scout') {
+            this.maxHp = 75;
+            this.speed = 4.8;
+            this.fireRate = 90;
+          } else if (charClass === 'heavy') {
+            this.maxHp = 150;
+            this.speed = 3.0;
+            this.fireRate = 450;
+          } else { // Ranger
+            this.maxHp = 100;
+            this.speed = 3.8;
+            this.fireRate = 140;
+          }
+
+          this.hp = this.maxHp;
           this.vx = 0;
           this.vy = 0;
           this.angle = 0;
           this.lastShot = 0;
-          this.fireRate = 140;
-          this.dashCooldown = 0;
-          this.maxDashCooldown = 2000;
+          this.abilityCooldown = 0;
+          this.maxAbilityCooldown = 2200;
+          this.isMoving = false;
         }
 
         update(dt) {
@@ -212,25 +281,24 @@
           if (keys['a'] || keys['A'] || keys['ArrowLeft']) dx -= 1;
           if (keys['d'] || keys['D'] || keys['ArrowRight']) dx += 1;
 
+          this.isMoving = dx !== 0 || dy !== 0;
+
           if (dx !== 0 && dy !== 0) {
             dx *= 0.7071;
             dy *= 0.7071;
           }
 
-          if ((keys[' '] || keys['Spacebar']) && this.dashCooldown <= 0 && (dx !== 0 || dy !== 0)) {
-            this.vx = dx * 16;
-            this.vy = dy * 16;
-            this.dashCooldown = this.maxDashCooldown;
-            createParticles(this.x, this.y, '#34d399', 12);
+          // Ability
+          if ((keys[' '] || keys['Spacebar']) && this.abilityCooldown <= 0) {
+            this.useAbility(dx, dy);
           } else {
             this.vx += (dx * this.speed - this.vx) * 0.2;
             this.vy += (dy * this.speed - this.vy) * 0.2;
           }
 
-          if (this.dashCooldown > 0) this.dashCooldown -= dt;
+          if (this.abilityCooldown > 0) this.abilityCooldown -= dt;
 
           moveAndResolveCollisions(this, this.vx, this.vy);
-
           this.angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
 
           if (mouse.isDown && Date.now() - this.lastShot > this.fireRate) {
@@ -239,11 +307,38 @@
           }
         }
 
+        useAbility(dx, dy) {
+          this.abilityCooldown = this.maxAbilityCooldown;
+
+          if (this.charClass === 'heavy') {
+            // Frag Grenade
+            const grenadeVx = Math.cos(this.angle) * 7;
+            const grenadeVy = Math.sin(this.angle) * 7;
+            grenades.push(new Grenade(this.x, this.y, grenadeVx, grenadeVy));
+          } else {
+            // Roll / Speed Rush
+            const mult = this.charClass === 'scout' ? 2.2 : 1.8;
+            this.vx = (dx !== 0 ? dx : Math.cos(this.angle)) * this.speed * mult;
+            this.vy = (dy !== 0 ? dy : Math.sin(this.angle)) * this.speed * mult;
+            createParticles(this.x, this.y, '#34d399', 12);
+          }
+        }
+
         shoot() {
-          const bulletSpeed = 9;
           const bx = this.x + Math.cos(this.angle) * (this.radius + 6);
           const by = this.y + Math.sin(this.angle) * (this.radius + 6);
-          bullets.push(new Bullet(bx, by, Math.cos(this.angle) * bulletSpeed, Math.sin(this.angle) * bulletSpeed, true));
+
+          if (this.charClass === 'heavy') {
+            // Shotgun Spread (3 pellets)
+            for (let i = -1; i <= 1; i++) {
+              const spreadAngle = this.angle + (i * 0.15);
+              bullets.push(new Bullet(bx, by, Math.cos(spreadAngle) * 8, Math.sin(spreadAngle) * 8, true));
+            }
+          } else {
+            // Single Rifle / SMG Shot
+            const bulletSpeed = this.charClass === 'scout' ? 10 : 9;
+            bullets.push(new Bullet(bx, by, Math.cos(this.angle) * bulletSpeed, Math.sin(this.angle) * bulletSpeed, true));
+          }
         }
 
         draw() {
@@ -251,21 +346,38 @@
           ctx.translate(this.x, this.y);
           ctx.rotate(this.angle);
 
-          ctx.fillStyle = '#065f46';
+          const legOffset = this.isMoving ? Math.sin(animTime * 0.015) * 6 : 0;
+
+          // Legs (Human walking motion)
+          ctx.fillStyle = '#1e293b';
+          ctx.fillRect(-6 + legOffset, -10, 4, 8);
+          ctx.fillRect(-6 - legOffset, 2, 4, 8);
+
+          // Body / Shirt
+          ctx.fillStyle = this.charClass === 'heavy' ? '#b45309' : (this.charClass === 'scout' ? '#0284c7' : '#065f46');
           ctx.beginPath();
           ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
           ctx.fill();
+
           ctx.strokeStyle = '#34d399';
-          ctx.lineWidth = 2.5;
+          ctx.lineWidth = 2;
           ctx.stroke();
 
-          ctx.fillStyle = '#d97706';
+          // Human Head
+          ctx.fillStyle = '#fbe3b5';
           ctx.beginPath();
-          ctx.arc(2, 0, 8, 0, Math.PI * 2);
+          ctx.arc(2, 0, 7, 0, Math.PI * 2);
           ctx.fill();
 
-          ctx.fillStyle = '#1e293b';
-          ctx.fillRect(6, -2.5, 16, 5);
+          // Hat
+          ctx.fillStyle = '#d97706';
+          ctx.beginPath();
+          ctx.arc(1, 0, 8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Weapon Barrel
+          ctx.fillStyle = '#0f172a';
+          ctx.fillRect(6, -2.5, 14, 5);
 
           ctx.restore();
         }
@@ -441,6 +553,48 @@
         }
       }
 
+      class Grenade {
+        constructor(x, y, vx, vy) {
+          this.x = x;
+          this.y = y;
+          this.vx = vx;
+          this.vy = vy;
+          this.fuse = 60; // frames
+          this.alive = true;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.vx *= 0.94;
+          this.vy *= 0.94;
+          this.fuse--;
+
+          if (this.fuse <= 0) {
+            this.explode();
+          }
+        }
+
+        explode() {
+          this.alive = false;
+          createParticles(this.x, this.y, '#f59e0b', 30);
+          enemies.forEach(e => {
+            const d = Math.hypot(e.x - this.x, e.y - this.y);
+            if (d < 110) {
+              e.hp -= 90;
+              if (e.hp <= 0) score += 100;
+            }
+          });
+        }
+
+        draw() {
+          ctx.fillStyle = '#f59e0b';
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
       class Particle {
         constructor(x, y, color) {
           this.x = x;
@@ -473,6 +627,7 @@
       let player;
       let enemies = [];
       let bullets = [];
+      let grenades = [];
       let particles = [];
 
       function createParticles(x, y, color, count = 8) {
@@ -547,9 +702,10 @@
       function initGame() {
         score = 0;
         wave = 1;
-        player = new Player(canvas.width / 2, canvas.height / 2);
+        player = new Player(canvas.width / 2, canvas.height / 2, selectedClass);
         enemies = [];
         bullets = [];
+        grenades = [];
         particles = [];
         spawnWave();
         gameRunning = true;
@@ -560,6 +716,7 @@
       function gameLoop(timestamp) {
         const dt = timestamp - lastTime || 0;
         lastTime = timestamp;
+        animTime = timestamp;
 
         if (gameRunning) {
           update(dt);
@@ -575,9 +732,9 @@
         hpBar.style.width = `${Math.max(0, (player.hp / player.maxHp) * 100)}%`;
         hpText.textContent = `${Math.max(0, Math.round(player.hp))}/${player.maxHp}`;
 
-        const dashPercent = Math.max(0, 100 - (player.dashCooldown / player.maxDashCooldown) * 100);
+        const dashPercent = Math.max(0, 100 - (player.abilityCooldown / player.maxAbilityCooldown) * 100);
         dashBar.style.width = `${dashPercent}%`;
-        dashText.textContent = player.dashCooldown <= 0 ? 'READY' : 'RECHARGING';
+        dashText.textContent = player.abilityCooldown <= 0 ? 'READY' : 'RECHARGING';
 
         scoreDisplay.textContent = score;
         waveDisplay.textContent = wave;
@@ -590,6 +747,9 @@
 
         bullets.forEach(b => b.update());
         bullets = bullets.filter(b => b.alive);
+
+        grenades.forEach(g => g.update());
+        grenades = grenades.filter(g => g.alive);
 
         particles.forEach(p => p.update());
         particles = particles.filter(p => p.alpha > 0);
@@ -657,6 +817,7 @@
 
         particles.forEach(p => p.draw());
         bullets.forEach(b => b.draw());
+        grenades.forEach(g => g.draw());
         enemies.forEach(e => e.draw());
         if (player) player.draw();
       }
