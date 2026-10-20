@@ -46,152 +46,60 @@
       <canvas id="gameCanvas" width="400" height="400" class="rounded-xl border border-slate-700"></canvas>
 
       <!-- Start Overlay -->
-      <div id="startOverlay" class="absolute inset-0 bg-slate-950/80 rounded-xl backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+      <div id="startOverlay" class="absolute inset-0 bg-slate-950/80 rounded-xl backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center z-10">
         <h2 class="text-3xl font-extrabold text-emerald-400 mb-2">SNAKE</h2>
         <p class="text-sm text-slate-300 mb-6">Sammle das Futter, fresse nicht deine eigene Schlange!</p>
-        <button id="startBtn" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105 cursor-pointer">
+        <button id="startBtn" type="button" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105 cursor-pointer">
           SPIEL STARTEN
         </button>
       </div>
 
       <!-- Game Over Overlay -->
-      <div id="gameOverOverlay" class="hidden absolute inset-0 bg-slate-950/90 rounded-xl backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+      <div id="gameOverOverlay" class="hidden absolute inset-0 bg-slate-950/90 rounded-xl backdrop-blur-md flex flex-col items-center justify-center p-6 text-center z-10">
         <h2 class="text-3xl font-extrabold text-rose-500 mb-2">GAME OVER</h2>
         <p class="text-slate-300 mb-4">Deine Erzielten Punkte: <span id="finalScore" class="text-emerald-400 font-bold">0</span></p>
-        <button id="restartBtn" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+        <button id="restartBtn" type="button" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
           NOCHMAL SPIELEN
         </button>
       </div>
     </div>
 
-    <!-- Touch / Mobile-Steuerung (für Smartphones) -->
+    <!-- Touch / Mobile-Steuerung -->
     <div class="grid grid-cols-3 gap-2 w-48 md:hidden mt-2">
       <div></div>
-      <button id="btnUp" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">▲</button>
+      <button id="btnUp" type="button" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">▲</button>
       <div></div>
-      <button id="btnLeft" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">◄</button>
-      <button id="btnDown" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">▼</button>
-      <button id="btnRight" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">►</button>
+      <button id="btnLeft" type="button" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">◄</button>
+      <button id="btnDown" type="button" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">▼</button>
+      <button id="btnRight" type="button" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">►</button>
     </div>
 
   </div>
 
   <script>
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+    window.addEventListener('DOMContentLoaded', () => {
+      const canvas = document.getElementById('gameCanvas');
+      const ctx = canvas.getContext('2d');
 
-    const scoreDisplay = document.getElementById('score');
-    const highscoreDisplay = document.getElementById('highscore');
-    const finalScoreDisplay = document.getElementById('finalScore');
-    const startOverlay = document.getElementById('startOverlay');
-    const gameOverOverlay = document.getElementById('gameOverOverlay');
-    const startBtn = document.getElementById('startBtn');
-    const restartBtn = document.getElementById('restartBtn');
+      const scoreDisplay = document.getElementById('score');
+      const highscoreDisplay = document.getElementById('highscore');
+      const finalScoreDisplay = document.getElementById('finalScore');
+      const startOverlay = document.getElementById('startOverlay');
+      const gameOverOverlay = document.getElementById('gameOverOverlay');
+      const startBtn = document.getElementById('startBtn');
+      const restartBtn = document.getElementById('restartBtn');
 
-    // Spielfeld-Einstellungen
-    const gridSize = 20;
-    const tileCount = canvas.width / gridSize;
+      const gridSize = 20;
+      const tileCount = canvas.width / gridSize;
 
-    // Spielzustand
-    let snake = [];
-    let food = { x: 0, y: 0 };
-    let dx = gridSize;
-    let dy = 0;
-    let score = 0;
-    let highscore = localStorage.getItem('snake_highscore') || 0;
-    let gameInterval = null;
-    let gameSpeed = 100; // ms pro Frame
-    let changingDirection = false;
+      let snake = [];
+      let food = { x: 0, y: 0 };
+      let dx = gridSize;
+      let dy = 0;
+      let score = 0;
+      let highscore = localStorage.getItem('snake_highscore') || 0;
+      let gameInterval = null;
+      let gameSpeed = 100;
+      let changingDirection = false;
 
-    highscoreDisplay.textContent = highscore;
-
-    function initGame() {
-      snake = [
-        { x: 160, y: 200 },
-        { x: 140, y: 200 },
-        { x: 120, y: 200 }
-      ];
-      score = 0;
-      dx = gridSize;
-      dy = 0;
-      scoreDisplay.textContent = score;
-      startOverlay.classList.add('hidden');
-      gameOverOverlay.classList.add('hidden');
-
-      spawnFood();
-      clearInterval(gameInterval);
-      gameInterval = setInterval(gameLoop, gameSpeed);
-    }
-
-    function spawnFood() {
-      food.x = Math.floor(Math.random() * tileCount) * gridSize;
-      food.y = Math.floor(Math.random() * tileCount) * gridSize;
-
-      // Sicherstellen, dass Futter nicht auf der Schlange spawnt
-      snake.forEach(part => {
-        if (part.x === food.x && part.y === food.y) {
-          spawnFood();
-        }
-      });
-    }
-
-    function gameLoop() {
-      if (hasGameEnded()) {
-        endGame();
-        return;
-      }
-
-      changingDirection = false;
-      clearCanvas();
-      drawFood();
-      moveSnake();
-      drawSnake();
-    }
-
-    function clearCanvas() {
-      ctx.fillStyle = '#1e293b';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Gitterlinien
-      ctx.strokeStyle = '#334155';
-      ctx.lineWidth = 0.5;
-      for (let i = 0; i < canvas.width; i += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(i, 0);
-        ctx.lineTo(i, canvas.height);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(0, i);
-        ctx.lineTo(canvas.width, i);
-        ctx.stroke();
-      }
-    }
-
-    function drawSnake() {
-      snake.forEach((part, index) => {
-        // Kopf anders einfärben als den Körper
-        if (index === 0) {
-          ctx.fillStyle = '#10b981'; // Dunkleres Grün für Kopf
-        } else {
-          ctx.fillStyle = '#34d399'; // Helleres Grün für Körper
-        }
-        ctx.fillRect(part.x, part.y, gridSize - 1, gridSize - 1);
-      });
-    }
-
-    function moveSnake() {
-      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
-      snake.unshift(head);
-
-      // Prüfen, ob Futter gefressen wurde
-      const hasEatenFood = snake[0].x === food.x && snake[0].y === food.y;
-      if (hasEatenFood) {
-        score += 10;
-        scoreDisplay.textContent = score;
-        if (score > highscore) {
-          highscore = score;
-          highscoreDisplay.textContent = highscore;
-          localStorage.setItem('snake_highscore', highscore);
-        }
-        spawnFood
+      highscoreDisplay.textContent = highscore;
