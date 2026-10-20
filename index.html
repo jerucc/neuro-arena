@@ -1,856 +1,197 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jungle Survival: Tactical RPG Edition</title>
+  <title>Klassisches Snake Spiel</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      background-color: #061208;
-      color: #d1fae5;
+      background-color: #0f172a;
+      color: #f8fafc;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       user-select: none;
     }
     canvas {
-      background: radial-gradient(circle, #0f2918 0%, #061208 100%);
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
-    }
-    .glass-panel {
-      background: rgba(15, 41, 24, 0.85);
-      backdrop-filter: blur(8px);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-    .class-card {
-      transition: all 0.2s ease-in-out;
-      cursor: pointer;
-    }
-    .class-card:hover, .class-card.selected {
-      border-color: #34d399;
-      background: rgba(6, 95, 70, 0.5);
-      transform: translateY(-2px);
+      background-color: #1e293b;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
     }
   </style>
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
 
-  <!-- Main Container -->
-  <div class="w-full max-w-5xl flex flex-col items-center gap-4">
+  <!-- Haupt-Container -->
+  <div class="flex flex-col items-center gap-4 max-w-lg w-full">
     
-    <!-- Header / Scoreboard -->
-    <header class="w-full flex justify-between items-center p-4 rounded-xl glass-panel">
+    <!-- Scoreboard -->
+    <div class="w-full flex justify-between items-center p-4 bg-slate-800/80 rounded-xl border border-slate-700">
       <div>
-        <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-green-300">
-          JUNGLE SURVIVAL: RPG
-        </h1>
-        <p class="text-xs text-emerald-500/80">Human Characters & Wildlife AI Combat</p>
+        <h1 class="text-xl font-bold text-emerald-400">SNAKE GAME</h1>
+        <p class="text-xs text-slate-400">Pfeiltasten oder WASD zum Steuern</p>
       </div>
-
-      <div class="flex gap-6 text-sm">
+      <div class="flex gap-6">
         <div class="text-center">
-          <span class="block text-emerald-500 text-xs">WAVE</span>
-          <span id="waveDisplay" class="font-bold text-emerald-400 text-lg">1</span>
+          <span class="block text-xs text-slate-400">PUNKTE</span>
+          <span id="score" class="text-xl font-bold text-emerald-400">0</span>
         </div>
         <div class="text-center">
-          <span class="block text-emerald-500 text-xs">SCORE</span>
-          <span id="scoreDisplay" class="font-bold text-green-300 text-lg">0</span>
-        </div>
-        <div class="text-center">
-          <span class="block text-emerald-500 text-xs">BEASTS</span>
-          <span id="enemyCountDisplay" class="font-bold text-amber-400 text-lg">0</span>
+          <span class="block text-xs text-slate-400">HIGHSCORE</span>
+          <span id="highscore" class="text-xl font-bold text-amber-400">0</span>
         </div>
       </div>
-    </header>
+    </div>
 
-    <!-- Canvas Area with Overlays -->
-    <div class="relative w-full flex justify-center">
-      <canvas id="gameCanvas" width="900" height="550" class="rounded-xl border border-emerald-900/50"></canvas>
+    <!-- Spielfeld Canvas -->
+    <div class="relative">
+      <canvas id="gameCanvas" width="400" height="400" class="rounded-xl border border-slate-700"></canvas>
 
-      <!-- Start & Class Selection Overlay -->
-      <div id="startOverlay" class="absolute inset-0 flex flex-col items-center justify-center bg-black/90 rounded-xl backdrop-blur-sm p-6 text-center z-10">
-        <h2 class="text-3xl font-extrabold text-emerald-400 mb-1">CHOOSE YOUR SURVIVOR</h2>
-        <p class="text-xs text-emerald-200/80 max-w-md mb-4">
-          Select a character class with unique stats and tactical abilities to enter the jungle.
-        </p>
-
-        <!-- Class Selection Cards -->
-        <div class="grid grid-cols-3 gap-3 w-full max-w-2xl mb-5">
-          <div id="cardRanger" class="class-card selected p-3 rounded-lg border border-emerald-800/80 bg-emerald-950/40 text-left" onclick="selectClass('ranger')">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-bold text-emerald-300 text-sm">🤠 RANGER</span>
-              <span class="text-[10px] text-emerald-400 bg-emerald-900/60 px-1.5 py-0.5 rounded">BALANCED</span>
-            </div>
-            <p class="text-[11px] text-gray-300 mb-2">Assault Rifle & Tactical Dodge Roll.</p>
-            <div class="text-[10px] text-emerald-400/80 space-y-0.5">
-              <p>• HP: 100 | Speed: Normal</p>
-              <p>• Ability: Tactical Roll (SPACE)</p>
-            </div>
-          </div>
-
-          <div id="cardScout" class="class-card p-3 rounded-lg border border-emerald-800/80 bg-emerald-950/40 text-left" onclick="selectClass('scout')">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-bold text-cyan-300 text-sm">⚡ SCOUT</span>
-              <span class="text-[10px] text-cyan-400 bg-cyan-900/60 px-1.5 py-0.5 rounded">FAST</span>
-            </div>
-            <p class="text-[11px] text-gray-300 mb-2">Dual SMG Rapid Fire & Speed Boost.</p>
-            <div class="text-[10px] text-cyan-400/80 space-y-0.5">
-              <p>• HP: 75 | Speed: Very Fast</p>
-              <p>• Ability: Adrenaline Rush (SPACE)</p>
-            </div>
-          </div>
-
-          <div id="cardHeavy" class="class-card p-3 rounded-lg border border-emerald-800/80 bg-emerald-950/40 text-left" onclick="selectClass('heavy')">
-            <div class="flex items-center justify-between mb-1">
-              <span class="font-bold text-amber-300 text-sm">🛡️ HEAVY</span>
-              <span class="text-[10px] text-amber-400 bg-amber-900/60 px-1.5 py-0.5 rounded">TANK</span>
-            </div>
-            <p class="text-[11px] text-gray-300 mb-2">Shotgun Spread & Explosive Grenades.</p>
-            <div class="text-[10px] text-amber-400/80 space-y-0.5">
-              <p>• HP: 150 | Speed: Slow</p>
-              <p>• Ability: Frag Grenade (SPACE)</p>
-            </div>
-          </div>
-        </div>
-
-        <button id="startBtn" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all transform hover:scale-105 cursor-pointer">
-          ENTER JUNGLE
+      <!-- Start Overlay -->
+      <div id="startOverlay" class="absolute inset-0 bg-slate-950/80 rounded-xl backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+        <h2 class="text-3xl font-extrabold text-emerald-400 mb-2">SNAKE</h2>
+        <p class="text-sm text-slate-300 mb-6">Sammle das Futter, fresse nicht deine eigene Schlange!</p>
+        <button id="startBtn" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105 cursor-pointer">
+          SPIEL STARTEN
         </button>
       </div>
 
       <!-- Game Over Overlay -->
-      <div id="gameOverOverlay" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/90 rounded-xl backdrop-blur-md p-6 text-center z-10">
-        <h2 class="text-4xl font-extrabold text-rose-500 mb-2">OVERWHELMED</h2>
-        <p class="text-emerald-300/80 mb-4">You did not survive the jungle wilds.</p>
-        <div class="bg-emerald-950/80 p-4 rounded-lg border border-emerald-900 mb-6 text-sm">
-          <p class="text-emerald-200">Final Score: <span id="finalScore" class="text-emerald-400 font-bold">0</span></p>
-          <p class="text-emerald-200">Waves Survived: <span id="finalWave" class="text-green-300 font-bold">0</span></p>
-        </div>
-        <button id="restartBtn" class="px-8 py-3 bg-emerald-500 hover:bg-emerald-400 text-gray-950 font-bold rounded-lg shadow-lg shadow-emerald-500/30 transition-all cursor-pointer">
-          TRY AGAIN
+      <div id="gameOverOverlay" class="hidden absolute inset-0 bg-slate-950/90 rounded-xl backdrop-blur-md flex flex-col items-center justify-center p-6 text-center">
+        <h2 class="text-3xl font-extrabold text-rose-500 mb-2">GAME OVER</h2>
+        <p class="text-slate-300 mb-4">Deine Erzielten Punkte: <span id="finalScore" class="text-emerald-400 font-bold">0</span></p>
+        <button id="restartBtn" class="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg shadow-lg shadow-emerald-500/20 transition-all cursor-pointer">
+          NOCHMAL SPIELEN
         </button>
       </div>
     </div>
 
-    <!-- Controls & AI Real-Time Stats -->
-    <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
-      
-      <!-- Player Status -->
-      <div class="p-4 rounded-xl glass-panel flex flex-col justify-between">
-        <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">Survivor Status</h3>
-        <div class="space-y-2">
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span>Health / Stamina</span>
-              <span id="hpText">100/100</span>
-            </div>
-            <div class="w-full bg-emerald-950 h-2 rounded-full overflow-hidden border border-emerald-900">
-              <div id="hpBar" class="bg-emerald-400 h-full w-full transition-all duration-200"></div>
-            </div>
-          </div>
-          <div>
-            <div class="flex justify-between text-xs mb-1">
-              <span>Class Ability (SPACE)</span>
-              <span id="dashText">READY</span>
-            </div>
-            <div class="w-full bg-emerald-950 h-1.5 rounded-full overflow-hidden border border-emerald-900">
-              <div id="dashBar" class="bg-green-400 h-full w-full transition-all duration-200"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- AI Live Telemetry -->
-      <div class="p-4 rounded-xl glass-panel flex flex-col justify-between">
-        <h3 class="text-xs font-bold text-green-300 uppercase tracking-wider mb-2">Beast AI Behavior</h3>
-        <div class="space-y-1 text-xs">
-          <div class="flex justify-between">
-            <span class="text-emerald-400/80">Beast State:</span>
-            <span id="aiStateText" class="text-amber-400 font-mono">HUNTING</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-emerald-400/80">Flanking Pack:</span>
-            <span id="aiFlankText" class="text-green-300 font-mono">ACTIVE</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-emerald-400/80">Predictive Lead:</span>
-            <span class="text-emerald-400 font-mono">ACTIVE</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Realtime Tuning -->
-      <div class="p-4 rounded-xl glass-panel flex flex-col justify-between">
-        <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider mb-2">Wildlife Aggression</h3>
-        <div class="space-y-2">
-          <div class="flex items-center justify-between gap-2">
-            <label for="aiAggrSlider" class="text-xs text-emerald-200">Beast Speed:</label>
-            <input type="range" id="aiAggrSlider" min="1" max="5" value="3" class="w-24 accent-emerald-400">
-          </div>
-          <p class="text-[10px] text-emerald-400/70 leading-tight">
-            Dynamically scales enemy reaction velocity and lead aiming accuracy.
-          </p>
-        </div>
-      </div>
-
+    <!-- Touch / Mobile-Steuerung (für Smartphones) -->
+    <div class="grid grid-cols-3 gap-2 w-48 md:hidden mt-2">
+      <div></div>
+      <button id="btnUp" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">▲</button>
+      <div></div>
+      <button id="btnLeft" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">◄</button>
+      <button id="btnDown" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">▼</button>
+      <button id="btnRight" class="p-3 bg-slate-800 rounded-lg text-center font-bold text-xl active:bg-slate-700">►</button>
     </div>
+
   </div>
 
-  <!-- Game Logic -->
   <script>
-    let selectedClass = 'ranger';
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
 
-    function selectClass(className) {
-      selectedClass = className;
-      document.querySelectorAll('.class-card').forEach(card => card.classList.remove('selected'));
-      if (className === 'ranger') document.getElementById('cardRanger').classList.add('selected');
-      if (className === 'scout') document.getElementById('cardScout').classList.add('selected');
-      if (className === 'heavy') document.getElementById('cardHeavy').classList.add('selected');
+    const scoreDisplay = document.getElementById('score');
+    const highscoreDisplay = document.getElementById('highscore');
+    const finalScoreDisplay = document.getElementById('finalScore');
+    const startOverlay = document.getElementById('startOverlay');
+    const gameOverOverlay = document.getElementById('gameOverOverlay');
+    const startBtn = document.getElementById('startBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    // Spielfeld-Einstellungen
+    const gridSize = 20;
+    const tileCount = canvas.width / gridSize;
+
+    // Spielzustand
+    let snake = [];
+    let food = { x: 0, y: 0 };
+    let dx = gridSize;
+    let dy = 0;
+    let score = 0;
+    let highscore = localStorage.getItem('snake_highscore') || 0;
+    let gameInterval = null;
+    let gameSpeed = 100; // ms pro Frame
+    let changingDirection = false;
+
+    highscoreDisplay.textContent = highscore;
+
+    function initGame() {
+      snake = [
+        { x: 160, y: 200 },
+        { x: 140, y: 200 },
+        { x: 120, y: 200 }
+      ];
+      score = 0;
+      dx = gridSize;
+      dy = 0;
+      scoreDisplay.textContent = score;
+      startOverlay.classList.add('hidden');
+      gameOverOverlay.classList.add('hidden');
+
+      spawnFood();
+      clearInterval(gameInterval);
+      gameInterval = setInterval(gameLoop, gameSpeed);
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const canvas = document.getElementById('gameCanvas');
-      const ctx = canvas.getContext('2d');
+    function spawnFood() {
+      food.x = Math.floor(Math.random() * tileCount) * gridSize;
+      food.y = Math.floor(Math.random() * tileCount) * gridSize;
 
-      const startOverlay = document.getElementById('startOverlay');
-      const gameOverOverlay = document.getElementById('gameOverOverlay');
-      const startBtn = document.getElementById('startBtn');
-      const restartBtn = document.getElementById('restartBtn');
-      const waveDisplay = document.getElementById('waveDisplay');
-      const scoreDisplay = document.getElementById('scoreDisplay');
-      const enemyCountDisplay = document.getElementById('enemyCountDisplay');
-      const hpBar = document.getElementById('hpBar');
-      const hpText = document.getElementById('hpText');
-      const dashBar = document.getElementById('dashBar');
-      const dashText = document.getElementById('dashText');
-      const aiStateText = document.getElementById('aiStateText');
-      const aiFlankText = document.getElementById('aiFlankText');
-      const aiAggrSlider = document.getElementById('aiAggrSlider');
-
-      let gameRunning = false;
-      let score = 0;
-      let wave = 1;
-      let keys = {};
-      let mouse = { x: canvas.width / 2, y: canvas.height / 2, isDown: false };
-      let lastTime = 0;
-      let animTime = 0;
-
-      const obstacles = [
-        { x: 220, y: 140, w: 90, h: 90, type: 'ruin' },
-        { x: 590, y: 140, w: 90, h: 90, type: 'ruin' },
-        { x: 405, y: 320, w: 90, h: 90, type: 'bush' },
-        { x: 220, y: 380, w: 90, h: 50, type: 'ruin' },
-        { x: 590, y: 380, w: 90, h: 50, type: 'bush' }
-      ];
-
-      class Player {
-        constructor(x, y, charClass) {
-          this.x = x;
-          this.y = y;
-          this.radius = 16;
-          this.charClass = charClass;
-
-          if (charClass === 'scout') {
-            this.maxHp = 75;
-            this.speed = 4.8;
-            this.fireRate = 90;
-          } else if (charClass === 'heavy') {
-            this.maxHp = 150;
-            this.speed = 3.0;
-            this.fireRate = 450;
-          } else { // Ranger
-            this.maxHp = 100;
-            this.speed = 3.8;
-            this.fireRate = 140;
-          }
-
-          this.hp = this.maxHp;
-          this.vx = 0;
-          this.vy = 0;
-          this.angle = 0;
-          this.lastShot = 0;
-          this.abilityCooldown = 0;
-          this.maxAbilityCooldown = 2200;
-          this.isMoving = false;
+      // Sicherstellen, dass Futter nicht auf der Schlange spawnt
+      snake.forEach(part => {
+        if (part.x === food.x && part.y === food.y) {
+          spawnFood();
         }
+      });
+    }
 
-        update(dt) {
-          let dx = 0;
-          let dy = 0;
-          if (keys['w'] || keys['W'] || keys['ArrowUp']) dy -= 1;
-          if (keys['s'] || keys['S'] || keys['ArrowDown']) dy += 1;
-          if (keys['a'] || keys['A'] || keys['ArrowLeft']) dx -= 1;
-          if (keys['d'] || keys['D'] || keys['ArrowRight']) dx += 1;
-
-          this.isMoving = dx !== 0 || dy !== 0;
-
-          if (dx !== 0 && dy !== 0) {
-            dx *= 0.7071;
-            dy *= 0.7071;
-          }
-
-          // Ability
-          if ((keys[' '] || keys['Spacebar']) && this.abilityCooldown <= 0) {
-            this.useAbility(dx, dy);
-          } else {
-            this.vx += (dx * this.speed - this.vx) * 0.2;
-            this.vy += (dy * this.speed - this.vy) * 0.2;
-          }
-
-          if (this.abilityCooldown > 0) this.abilityCooldown -= dt;
-
-          moveAndResolveCollisions(this, this.vx, this.vy);
-          this.angle = Math.atan2(mouse.y - this.y, mouse.x - this.x);
-
-          if (mouse.isDown && Date.now() - this.lastShot > this.fireRate) {
-            this.shoot();
-            this.lastShot = Date.now();
-          }
-        }
-
-        useAbility(dx, dy) {
-          this.abilityCooldown = this.maxAbilityCooldown;
-
-          if (this.charClass === 'heavy') {
-            // Frag Grenade
-            const grenadeVx = Math.cos(this.angle) * 7;
-            const grenadeVy = Math.sin(this.angle) * 7;
-            grenades.push(new Grenade(this.x, this.y, grenadeVx, grenadeVy));
-          } else {
-            // Roll / Speed Rush
-            const mult = this.charClass === 'scout' ? 2.2 : 1.8;
-            this.vx = (dx !== 0 ? dx : Math.cos(this.angle)) * this.speed * mult;
-            this.vy = (dy !== 0 ? dy : Math.sin(this.angle)) * this.speed * mult;
-            createParticles(this.x, this.y, '#34d399', 12);
-          }
-        }
-
-        shoot() {
-          const bx = this.x + Math.cos(this.angle) * (this.radius + 6);
-          const by = this.y + Math.sin(this.angle) * (this.radius + 6);
-
-          if (this.charClass === 'heavy') {
-            // Shotgun Spread (3 pellets)
-            for (let i = -1; i <= 1; i++) {
-              const spreadAngle = this.angle + (i * 0.15);
-              bullets.push(new Bullet(bx, by, Math.cos(spreadAngle) * 8, Math.sin(spreadAngle) * 8, true));
-            }
-          } else {
-            // Single Rifle / SMG Shot
-            const bulletSpeed = this.charClass === 'scout' ? 10 : 9;
-            bullets.push(new Bullet(bx, by, Math.cos(this.angle) * bulletSpeed, Math.sin(this.angle) * bulletSpeed, true));
-          }
-        }
-
-        draw() {
-          ctx.save();
-          ctx.translate(this.x, this.y);
-          ctx.rotate(this.angle);
-
-          const legOffset = this.isMoving ? Math.sin(animTime * 0.015) * 6 : 0;
-
-          // Legs (Human walking motion)
-          ctx.fillStyle = '#1e293b';
-          ctx.fillRect(-6 + legOffset, -10, 4, 8);
-          ctx.fillRect(-6 - legOffset, 2, 4, 8);
-
-          // Body / Shirt
-          ctx.fillStyle = this.charClass === 'heavy' ? '#b45309' : (this.charClass === 'scout' ? '#0284c7' : '#065f46');
-          ctx.beginPath();
-          ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.strokeStyle = '#34d399';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-
-          // Human Head
-          ctx.fillStyle = '#fbe3b5';
-          ctx.beginPath();
-          ctx.arc(2, 0, 7, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Hat
-          ctx.fillStyle = '#d97706';
-          ctx.beginPath();
-          ctx.arc(1, 0, 8, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Weapon Barrel
-          ctx.fillStyle = '#0f172a';
-          ctx.fillRect(6, -2.5, 14, 5);
-
-          ctx.restore();
-        }
+    function gameLoop() {
+      if (hasGameEnded()) {
+        endGame();
+        return;
       }
 
-      class AIEnemy {
-        constructor(x, y, tier = 'standard') {
-          this.x = x;
-          this.y = y;
-          this.radius = tier === 'boss' ? 24 : 15;
-          this.tier = tier;
-          this.maxHp = tier === 'boss' ? 220 : (tier === 'flanker' ? 45 : 70);
-          this.hp = this.maxHp;
-          this.speed = tier === 'flanker' ? 3.4 : (tier === 'boss' ? 1.6 : 2.5);
-          this.vx = 0;
-          this.vy = 0;
-          this.angle = 0;
-          this.lastShot = 0;
-          this.fireRate = tier === 'boss' ? 250 : 600;
-          this.state = 'HUNT';
-          this.flankAngleOffset = (Math.random() > 0.5 ? 1 : -1) * (Math.PI / 3 + Math.random() * 0.4);
-        }
+      changingDirection = false;
+      clearCanvas();
+      drawFood();
+      moveSnake();
+      drawSnake();
+    }
 
-        update(dt) {
-          const distToPlayer = Math.hypot(player.x - this.x, player.y - this.y);
-          const aggrMultiplier = parseFloat(aiAggrSlider.value) / 3;
+    function clearCanvas() {
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          if (this.hp < this.maxHp * 0.3 && distToPlayer < 180) {
-            this.state = 'RETREAT';
-          } else if (distToPlayer > 260 || this.tier === 'flanker') {
-            this.state = 'FLANK';
-          } else {
-            this.state = 'HUNT';
-          }
+      // Gitterlinien
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i < canvas.width; i += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(i, 0);
+        ctx.lineTo(i, canvas.height);
+        ctx.stroke();
 
-          let targetX = player.x;
-          let targetY = player.y;
-
-          if (this.state === 'FLANK') {
-            const baseAngle = Math.atan2(this.y - player.y, this.x - player.x);
-            targetX = player.x + Math.cos(baseAngle + this.flankAngleOffset) * 200;
-            targetY = player.y + Math.sin(baseAngle + this.flankAngleOffset) * 200;
-          } else if (this.state === 'RETREAT') {
-            const awayAngle = Math.atan2(this.y - player.y, this.x - player.x);
-            targetX = this.x + Math.cos(awayAngle) * 150;
-            targetY = this.y + Math.sin(awayAngle) * 150;
-          }
-
-          let desiredVx = (targetX - this.x);
-          let desiredVy = (targetY - this.y);
-          const dist = Math.hypot(desiredVx, desiredVy);
-
-          if (dist > 0) {
-            desiredVx = (desiredVx / dist) * this.speed * aggrMultiplier;
-            desiredVy = (desiredVy / dist) * this.speed * aggrMultiplier;
-          }
-
-          let sepX = 0, sepY = 0;
-          enemies.forEach(other => {
-            if (other !== this) {
-              const d = Math.hypot(other.x - this.x, other.y - this.y);
-              if (d < 45 && d > 0) {
-                sepX -= (other.x - this.x) / d * 1.8;
-                sepY -= (other.y - this.y) / d * 1.8;
-              }
-            }
-          });
-
-          desiredVx += sepX;
-          desiredVy += sepY;
-
-          obstacles.forEach(obs => {
-            const nearestX = Math.max(obs.x, Math.min(this.x, obs.x + obs.w));
-            const nearestY = Math.max(obs.y, Math.min(this.y, obs.y + obs.h));
-            const obsDist = Math.hypot(this.x - nearestX, this.y - nearestY);
-
-            if (obsDist < 35 && obsDist > 0) {
-              desiredVx += (this.x - nearestX) / obsDist * 3.5;
-              desiredVy += (this.y - nearestY) / obsDist * 3.5;
-            }
-          });
-
-          this.vx += (desiredVx - this.vx) * 0.1;
-          this.vy += (desiredVy - this.vy) * 0.1;
-
-          moveAndResolveCollisions(this, this.vx, this.vy);
-
-          const bulletSpeed = 6.5;
-          const timeToTarget = distToPlayer / bulletSpeed;
-          const predictedPlayerX = player.x + player.vx * timeToTarget * 0.6;
-          const predictedPlayerY = player.y + player.vy * timeToTarget * 0.6;
-
-          this.angle = Math.atan2(predictedPlayerY - this.y, predictedPlayerX - this.x);
-
-          if (Date.now() - this.lastShot > (this.fireRate / aggrMultiplier) && distToPlayer < 420) {
-            if (hasLineOfSight(this.x, this.y, player.x, player.y)) {
-              this.shoot();
-              this.lastShot = Date.now();
-            }
-          }
-        }
-
-        shoot() {
-          const bulletSpeed = 6.5;
-          const bx = this.x + Math.cos(this.angle) * (this.radius + 4);
-          const by = this.y + Math.sin(this.angle) * (this.radius + 4);
-          const color = this.tier === 'boss' ? '#f59e0b' : '#10b981';
-          bullets.push(new Bullet(bx, by, Math.cos(this.angle) * bulletSpeed, Math.sin(this.angle) * bulletSpeed, false, color));
-        }
-
-        draw() {
-          ctx.save();
-          ctx.translate(this.x, this.y);
-          ctx.rotate(this.angle);
-
-          const color = this.tier === 'boss' ? '#b45309' : (this.tier === 'flanker' ? '#047857' : '#4b5563');
-          ctx.fillStyle = color;
-          ctx.beginPath();
-          ctx.arc(0, 0, this.radius, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.strokeStyle = this.tier === 'boss' ? '#fbbf24' : '#34d399';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-
-          ctx.fillStyle = '#111827';
-          ctx.fillRect(3, -2, 12, 4);
-
-          ctx.restore();
-
-          if (this.hp < this.maxHp) {
-            ctx.fillStyle = 'rgba(0,0,0,0.5)';
-            ctx.fillRect(this.x - 15, this.y - 28, 30, 4);
-            ctx.fillStyle = '#34d399';
-            ctx.fillRect(this.x - 15, this.y - 28, (this.hp / this.maxHp) * 30, 4);
-          }
-        }
+        ctx.beginPath();
+        ctx.moveTo(0, i);
+        ctx.lineTo(canvas.width, i);
+        ctx.stroke();
       }
+    }
 
-      class Bullet {
-        constructor(x, y, vx, vy, isPlayer, color = '#34d399') {
-          this.x = x;
-          this.y = y;
-          this.vx = vx;
-          this.vy = vy;
-          this.radius = isPlayer ? 3.5 : 3;
-          this.isPlayer = isPlayer;
-          this.color = color;
-          this.alive = true;
+    function drawSnake() {
+      snake.forEach((part, index) => {
+        // Kopf anders einfärben als den Körper
+        if (index === 0) {
+          ctx.fillStyle = '#10b981'; // Dunkleres Grün für Kopf
+        } else {
+          ctx.fillStyle = '#34d399'; // Helleres Grün für Körper
         }
+        ctx.fillRect(part.x, part.y, gridSize - 1, gridSize - 1);
+      });
+    }
 
-        update() {
-          this.x += this.vx;
-          this.y += this.vy;
+    function moveSnake() {
+      const head = { x: snake[0].x + dx, y: snake[0].y + dy };
+      snake.unshift(head);
 
-          if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
-            this.alive = false;
-          }
-
-          obstacles.forEach(obs => {
-            if (this.x > obs.x && this.x < obs.x + obs.w && this.y > obs.y && this.y < obs.y + obs.h) {
-              this.alive = false;
-              createParticles(this.x, this.y, '#065f46', 4);
-            }
-          });
-        }
-
-        draw() {
-          ctx.fillStyle = this.color;
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      class Grenade {
-        constructor(x, y, vx, vy) {
-          this.x = x;
-          this.y = y;
-          this.vx = vx;
-          this.vy = vy;
-          this.fuse = 60; // frames
-          this.alive = true;
-        }
-
-        update() {
-          this.x += this.vx;
-          this.y += this.vy;
-          this.vx *= 0.94;
-          this.vy *= 0.94;
-          this.fuse--;
-
-          if (this.fuse <= 0) {
-            this.explode();
-          }
-        }
-
-        explode() {
-          this.alive = false;
-          createParticles(this.x, this.y, '#f59e0b', 30);
-          enemies.forEach(e => {
-            const d = Math.hypot(e.x - this.x, e.y - this.y);
-            if (d < 110) {
-              e.hp -= 90;
-              if (e.hp <= 0) score += 100;
-            }
-          });
-        }
-
-        draw() {
-          ctx.fillStyle = '#f59e0b';
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, 5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-
-      class Particle {
-        constructor(x, y, color) {
-          this.x = x;
-          this.y = y;
-          this.color = color;
-          this.radius = Math.random() * 2.5 + 1;
-          this.vx = (Math.random() - 0.5) * 6;
-          this.vy = (Math.random() - 0.5) * 6;
-          this.alpha = 1;
-          this.decay = Math.random() * 0.04 + 0.02;
-        }
-
-        update() {
-          this.x += this.vx;
-          this.y += this.vy;
-          this.alpha -= this.decay;
-        }
-
-        draw() {
-          ctx.save();
-          ctx.globalAlpha = Math.max(0, this.alpha);
-          ctx.fillStyle = this.color;
-          ctx.beginPath();
-          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
-        }
-      }
-
-      let player;
-      let enemies = [];
-      let bullets = [];
-      let grenades = [];
-      let particles = [];
-
-      function createParticles(x, y, color, count = 8) {
-        for (let i = 0; i < count; i++) {
-          particles.push(new Particle(x, y, color));
-        }
-      }
-
-      function hasLineOfSight(x1, y1, x2, y2) {
-        for (let obs of obstacles) {
-          if (lineIntersectsBox(x1, y1, x2, y2, obs)) return false;
-        }
-        return true;
-      }
-
-      function lineIntersectsBox(x1, y1, x2, y2, box) {
-        const minX = box.x;
-        const maxX = box.x + box.w;
-        const minY = box.y;
-        const maxY = box.y + box.h;
-
-        const steps = 15;
-        for (let i = 0; i <= steps; i++) {
-          const t = i / steps;
-          const px = x1 + (x2 - x1) * t;
-          const py = y1 + (y2 - y1) * t;
-          if (px >= minX && px <= maxX && py >= minY && py <= maxY) return true;
-        }
-        return false;
-      }
-
-      function moveAndResolveCollisions(entity, vx, vy) {
-        entity.x += vx;
-        obstacles.forEach(obs => {
-          if (entity.x + entity.radius > obs.x && entity.x - entity.radius < obs.x + obs.w &&
-              entity.y + entity.radius > obs.y && entity.y - entity.radius < obs.y + obs.h) {
-            if (vx > 0) entity.x = obs.x - entity.radius;
-            else if (vx < 0) entity.x = obs.x + obs.w + entity.radius;
-          }
-        });
-
-        entity.y += vy;
-        obstacles.forEach(obs => {
-          if (entity.x + entity.radius > obs.x && entity.x - entity.radius < obs.x + obs.w &&
-              entity.y + entity.radius > obs.y && entity.y - entity.radius < obs.y + obs.h) {
-            if (vy > 0) entity.y = obs.y - entity.radius;
-            else if (vy < 0) entity.y = obs.y + obs.h + entity.radius;
-          }
-        });
-
-        entity.x = Math.max(entity.radius, Math.min(canvas.width - entity.radius, entity.x));
-        entity.y = Math.max(entity.radius, Math.min(canvas.height - entity.radius, entity.y));
-      }
-
-      function spawnWave() {
-        const count = 2 + wave * 2;
-        for (let i = 0; i < count; i++) {
-          let sx, sy;
-          do {
-            sx = Math.random() * canvas.width;
-            sy = Math.random() * canvas.height;
-          } while (Math.hypot(sx - player.x, sy - player.y) < 220);
-
-          let tier = 'standard';
-          if (i % 3 === 0) tier = 'flanker';
-          if (wave % 3 === 0 && i === 0) tier = 'boss';
-
-          enemies.push(new AIEnemy(sx, sy, tier));
-        }
-      }
-
-      function initGame() {
-        score = 0;
-        wave = 1;
-        player = new Player(canvas.width / 2, canvas.height / 2, selectedClass);
-        enemies = [];
-        bullets = [];
-        grenades = [];
-        particles = [];
-        spawnWave();
-        gameRunning = true;
-        gameOverOverlay.classList.add('hidden');
-        startOverlay.classList.add('hidden');
-      }
-
-      function gameLoop(timestamp) {
-        const dt = timestamp - lastTime || 0;
-        lastTime = timestamp;
-        animTime = timestamp;
-
-        if (gameRunning) {
-          update(dt);
-          draw();
-        }
-
-        requestAnimationFrame(gameLoop);
-      }
-
-      function update(dt) {
-        player.update(dt);
-
-        hpBar.style.width = `${Math.max(0, (player.hp / player.maxHp) * 100)}%`;
-        hpText.textContent = `${Math.max(0, Math.round(player.hp))}/${player.maxHp}`;
-
-        const dashPercent = Math.max(0, 100 - (player.abilityCooldown / player.maxAbilityCooldown) * 100);
-        dashBar.style.width = `${dashPercent}%`;
-        dashText.textContent = player.abilityCooldown <= 0 ? 'READY' : 'RECHARGING';
-
+      // Prüfen, ob Futter gefressen wurde
+      const hasEatenFood = snake[0].x === food.x && snake[0].y === food.y;
+      if (hasEatenFood) {
+        score += 10;
         scoreDisplay.textContent = score;
-        waveDisplay.textContent = wave;
-        enemyCountDisplay.textContent = enemies.length;
-
-        if (enemies.length > 0) {
-          aiStateText.textContent = enemies[0].state;
-          aiFlankText.textContent = enemies[0].state === 'FLANK' ? 'PACK ACTIVE' : 'DIRECT';
+        if (score > highscore) {
+          highscore = score;
+          highscoreDisplay.textContent = highscore;
+          localStorage.setItem('snake_highscore', highscore);
         }
-
-        bullets.forEach(b => b.update());
-        bullets = bullets.filter(b => b.alive);
-
-        grenades.forEach(g => g.update());
-        grenades = grenades.filter(g => g.alive);
-
-        particles.forEach(p => p.update());
-        particles = particles.filter(p => p.alpha > 0);
-
-        enemies.forEach(e => e.update(dt));
-
-        bullets.forEach(bullet => {
-          if (bullet.isPlayer) {
-            enemies.forEach(enemy => {
-              if (Math.hypot(bullet.x - enemy.x, bullet.y - enemy.y) < enemy.radius + bullet.radius) {
-                enemy.hp -= 20;
-                bullet.alive = false;
-                createParticles(bullet.x, bullet.y, '#34d399', 6);
-                if (enemy.hp <= 0) {
-                  score += enemy.tier === 'boss' ? 300 : 100;
-                }
-              }
-            });
-          } else {
-            if (Math.hypot(bullet.x - player.x, bullet.y - player.y) < player.radius + bullet.radius) {
-              player.hp -= 12;
-              bullet.alive = false;
-              createParticles(player.x, player.y, '#f43f5e', 8);
-              if (player.hp <= 0) {
-                endGame();
-              }
-            }
-          }
-        });
-
-        enemies = enemies.filter(e => e.hp > 0);
-
-        if (enemies.length === 0) {
-          wave++;
-          score += 200;
-          spawnWave();
-        }
-      }
-
-      function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        ctx.strokeStyle = 'rgba(16, 185, 129, 0.04)';
-        ctx.lineWidth = 1;
-        for (let x = 0; x < canvas.width; x += 40) {
-          ctx.beginPath();
-          ctx.moveTo(x, 0);
-          ctx.lineTo(x, canvas.height);
-          ctx.stroke();
-        }
-        for (let y = 0; y < canvas.height; y += 40) {
-          ctx.beginPath();
-          ctx.moveTo(0, y);
-          ctx.lineTo(canvas.width, y);
-          ctx.stroke();
-        }
-
-        obstacles.forEach(obs => {
-          ctx.fillStyle = obs.type === 'ruin' ? '#064e3b' : '#022c22';
-          ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
-          ctx.strokeStyle = '#059669';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(obs.x, obs.y, obs.w, obs.h);
-        });
-
-        particles.forEach(p => p.draw());
-        bullets.forEach(b => b.draw());
-        grenades.forEach(g => g.draw());
-        enemies.forEach(e => e.draw());
-        if (player) player.draw();
-      }
-
-      function endGame() {
-        gameRunning = false;
-        document.getElementById('finalScore').textContent = score;
-        document.getElementById('finalWave').textContent = wave;
-        gameOverOverlay.classList.remove('hidden');
-      }
-
-      window.addEventListener('keydown', e => keys[e.key] = true);
-      window.addEventListener('keyup', e => keys[e.key] = false);
-
-      canvas.addEventListener('mousemove', e => {
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = e.clientX - rect.left;
-        mouse.y = e.clientY - rect.top;
-      });
-
-      canvas.addEventListener('mousedown', e => {
-        if (e.button === 0) mouse.isDown = true;
-      });
-
-      window.addEventListener('mouseup', e => {
-        if (e.button === 0) mouse.isDown = false;
-      });
-
-      startBtn.addEventListener('click', initGame);
-      restartBtn.addEventListener('click', initGame);
-
-      requestAnimationFrame(gameLoop);
-    });
-  </script>
-</body>
-</html>
+        spawnFood
